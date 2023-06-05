@@ -19,7 +19,6 @@ from tensorflow.keras import layers, losses
 
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
-from sklearn.decomposition import PCA
 from sklearn.metrics import accuracy_score
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
@@ -28,14 +27,26 @@ from sklearn.model_selection import KFold, train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
-
-
-
 #########################################
 ############## Loading Data #############
 #########################################
 
 class Database:
+    """
+    Loading neuronal and behavioural data from matlab files 
+
+    Attributes:
+        data_set_no (int): The number of the data set.
+        states (numpy.ndarray): A single array of states, where each number corresponds to a behaviour.
+        state_names (list): List of state names.
+        neuron_traces (numpy.ndarray): Array of neuron traces.
+        neuron_names (numpy.ndarray): Array of neuron names.
+        fps (float): Frames per second.
+
+    Methods:
+        exclude_neurons: Excludes specified neurons from the database.
+
+    """
     def __init__(self, data_set_no):
         self.data_set_no = data_set_no
         data_dict = mat73.loadmat('NoStim_Data.mat')
@@ -51,9 +62,29 @@ class Database:
         self.states = np.sum([n*States[s] for n, s in enumerate(States)], axis = 0).astype(int) # making a single states array in which each number corresponds to a behaviour
         self.state_names = [*States.keys()]
         self.neuron_traces = np.array(deltaFOverF_bc).T
-        self.derivative_traces = derivatives['traces'].T
+        #self.derivative_traces = derivatives['traces'].T
         self.neuron_names = np.array(NeuronNames, dtype=object)
         self.fps = fps
+
+    def exclude_neurons(self, exclude_neurons):
+        """
+        Excludes specified neurons from the database.
+
+        Args:
+            exclude_neurons (list): List of neuron names to exclude.
+
+        Returns:
+            None
+
+        """
+        neuron_names = self.neuron_names
+        mask = np.zeros_like(self.neuron_names, dtype='bool')
+        for exclude_neuron in exclude_neurons:
+            mask = np.logical_or(mask, neuron_names==exclude_neuron)
+        mask = ~mask
+        self.neuron_traces = self.neuron_traces[mask] 
+        #self.derivative_traces = self.derivative_traces[mask] 
+        self.neuron_names = self.neuron_names[mask]
 
 flat_partial = lambda x: x.reshape(x.shape[0],-1)
 
@@ -61,10 +92,23 @@ flat_partial = lambda x: x.reshape(x.shape[0],-1)
 ####### Data preprocessing functions #######
 ############################################
 
-def bandpass(traces, f_l, f_h, sampling_freq):    
+def bandpass(traces, f_l, f_h, sampling_freq):
+    """
+    Apply a bandpass filter to the input traces.
+
+    Parameters:
+        traces (np.ndarray): Input traces to be filtered.
+        f_l (float): Lower cutoff frequency in Hz.
+        f_h (float): Upper cutoff frequency in Hz.
+        sampling_freq (float): Sampling frequency in Hz.
+
+    Returns:
+        filtered (np.ndarray): Filtered traces.
+
+    """    
     cut_off_h = f_h*sampling_freq/2 ## in units of sampling_freq/2
     cut_off_l= f_l*sampling_freq/2 ## in units of sampling_freq/2
-        #### Note: the input f_l and f_h are angular frequencies. Hence the argument sampling_freq in the function is redundant: since the signal.butter function takes angular frequencies if fs is None.
+    #### Note: the input f_l and f_h are angular frequencies. Hence the argument sampling_freq in the function is redundant: since the signal.butter function takes angular frequencies if fs is None.
     
     sos = signal.butter(4, [cut_off_l, cut_off_h], 'bandpass', fs=sampling_freq, output='sos')
     ### filtering the traces forward and backwards
@@ -289,6 +333,19 @@ class BunDLeTrainer:
     
 
 def pca_initialisation(X_, tau, latent_dim):
+    """
+    Initialises BunDLe Net's tau such that its output is the PCA of the input traces.
+    PCA initialisation may make the embeddings more reproduceable across runs.
+    This function is called within the train_model() function and saves the learned tau weights
+    in a .h5 file in the same repository.
+
+    Parameters:
+        X_ (np.ndarray): Input data.
+        tau (object): BunDLe Net tau (tf sequential layer).
+        latent_dim (int): Dimension of the latent space.
+    
+
+    """
     ### Performing PCA on the time slice
     X0_ = X_[:,0,:,:]
     X_pca = X_.reshape(X_.shape[0],2,1,-1)[:,0,0,:]
