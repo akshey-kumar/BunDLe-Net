@@ -84,7 +84,6 @@ plt.ylabel("$Y_{pca}$")
 plt.axis([0,Y_pca.shape[0],-0.5,0.5])
 plt.show()
 
-%matplotlib inline
 plt.figure(figsize=(15,3))
 plt.imshow([B_],aspect="auto",cmap="Pastel1")
 plt.plot(Y_pca[:,2]/3/np.max(np.abs(Y_pca[:,2])), color = 'green')

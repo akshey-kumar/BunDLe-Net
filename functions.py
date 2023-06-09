@@ -49,7 +49,7 @@ class Database:
     """
     def __init__(self, data_set_no):
         self.data_set_no = data_set_no
-        data_dict = mat73.loadmat('NoStim_Data.mat')
+        data_dict = mat73.loadmat('data/raw/NoStim_Data.mat')
         data  = data_dict['NoStim_Data']
 
         deltaFOverF_bc = data['deltaFOverF_bc'][self.data_set_no]
@@ -376,7 +376,7 @@ def pca_initialisation(X_, tau, latent_dim):
                           )
     Y0_pred = pcaencoder(X0_).numpy()
     ### Saving weights of this model
-    pcaencoder.encoder.save_weights('tau_pca_weights.h5')
+    pcaencoder.encoder.save_weights('data/generated/tau_pca_weights.h5')
     
 
 def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=False):
@@ -397,7 +397,7 @@ def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=
     train_dataset = tf_batch_prep(X_train, B_train_1)
     if pca_init:
         pca_initialisation(X_train, model.tau, model.latent_dim)
-        model.tau.load_weights('tau_pca_weights.h5')
+        model.tau.load_weights('data/generated/tau_pca_weights.h5')
 
     trainer = BunDLeTrainer(model, optimizer)
     loss_array = np.zeros((1,3))
@@ -435,6 +435,25 @@ def hits_at_rank(rank, Y_test, Y_pred):
 ########################################
 ########## Plotting functions ########## 
 ########################################
+
+def plotting_neuronal_behavioural(X,B, behaviour_labels=[], vmin=0, vmax=2):
+    fig, axs = plt.subplots(2,1,figsize=(10,4))
+    im0 = axs[0].imshow(X.T,aspect='auto', vmin=vmin,vmax=vmax, interpolation='None')
+    axs[0].set_xlabel("time $t$")
+    axs[0].set_ylabel("Neuronal activation")
+    
+    # get discrete colormap
+    cmap = plt.get_cmap('RdBu', np.max(B) - np.min(B) + 1)
+    mat = axs[1].imshow([B], cmap=cmap, vmin=np.min(B) - 0.5, 
+                      vmax=np.max(B) + 0.5 , aspect='auto')
+    # tell the colorbar to tick at integers
+    cax = plt.colorbar(mat, ticks=np.arange(np.min(B), np.max(B) + 1), orientation='horizontal', pad=0.4)
+    if behaviour_labels != []:
+        cax.ax.set_xticklabels(behaviour_labels)
+    plt.xlabel("time $t$")
+    plt.ylabel("Behaviour")
+    plt.yticks([])
+
 
 def plot_phase_space(pca_neurons, states, show_points=False):
     if pca_neurons.shape[1]==3:
