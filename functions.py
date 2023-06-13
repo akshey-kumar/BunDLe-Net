@@ -455,7 +455,7 @@ def plotting_neuronal_behavioural(X,B, behaviour_labels=[], vmin=0, vmax=2):
     plt.yticks([])
 
 
-def plot_phase_space(pca_neurons, states, show_points=False):
+def plot_phase_space(pca_neurons, states, show_points=False, state_names = ['Dorsal turn', 'Forward', 'No state', 'Reverse-1', 'Reverse-2', 'Sustained reverse', 'Slowing', 'Ventral turn']):
     if pca_neurons.shape[1]==3:
         fig = plt.figure(figsize=(8,8))
         ax = plt.axes(projection='3d')
@@ -468,7 +468,6 @@ def plot_phase_space(pca_neurons, states, show_points=False):
         for segment, state in zip(segments, states[:-1]):
             p = ax.plot3D(segment.T[0], segment.T[1], segment.T[2], color=colors[state] )
         # Create legend
-        state_names = ['Dorsal turn', 'Forward', 'No state', 'Reverse-1', 'Reverse-2', 'Sustained reverse', 'Slowing', 'Ventral turn']
         legend_elements = [Line2D([0], [0], color=c, lw=4, label=state) for c, state in zip(colors, state_names)]
         ax.legend(handles=legend_elements)
         plt.show()
@@ -484,7 +483,6 @@ def plot_phase_space(pca_neurons, states, show_points=False):
         for segment, state in zip(segments, states[:-1]):
             p = ax.plot(segment.T[0], segment.T[1], color=colors[state])
         # Create legend
-        state_names = ['Dorsal turn', 'Forward', 'No state', 'Reverse-1', 'Reverse-2', 'Sustained reverse', 'Slowing', 'Ventral turn']
         legend_elements = [Line2D([0], [0], color=c, lw=4, label=state) for c, state in zip(colors, state_names)]
         ax.legend(handles=legend_elements)
     else:
@@ -494,7 +492,7 @@ def plot_phase_space(pca_neurons, states, show_points=False):
     	ax.scatter(X[0], X[1], X[2], c='k',s=0.2)
     return ax
         
-def rotating_plot(Y, B, show_points=False, filename='rotation.gif'):
+def rotating_plot(Y, B, show_points=False, filename='rotation.gif', state_names = ['Dorsal turn', 'Forward', 'No state', 'Reverse-1', 'Reverse-2', 'Sustained reverse', 'Slowing', 'Ventral turn']):
     fig = plt.figure(figsize=(8,8))
     ax = plt.axes(projection='3d')
     def rotate(angle):
@@ -508,7 +506,6 @@ def rotating_plot(Y, B, show_points=False, filename='rotation.gif'):
     for segment, state in zip(segments, B[:-1]):
         p = ax.plot3D(segment.T[0], segment.T[1], segment.T[2], color=colors[state] )
     # Create legend
-    state_names = ['Dorsal turn', 'Forward', 'No state', 'Reverse-1', 'Reverse-2', 'Sustained reverse', 'Slowing', 'Ventral turn']
     legend_elements = [Line2D([0], [0], color=c, lw=4, label=state) for c, state in zip(colors, state_names)]
     ax.legend(handles=legend_elements)
     if show_points==True:
