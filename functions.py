@@ -437,6 +437,9 @@ def hits_at_rank(rank, Y_test, Y_pred):
 ########################################
 
 def plotting_neuronal_behavioural(X,B, behaviour_labels=[], vmin=0, vmax=2):
+    '''
+    Function to plot neuronal and behavioural time series for data visualisation
+    '''
     fig, axs = plt.subplots(2,1,figsize=(10,4))
     im0 = axs[0].imshow(X.T,aspect='auto', vmin=vmin,vmax=vmax, interpolation='None')
     axs[0].set_xlabel("time $t$")
@@ -454,63 +457,50 @@ def plotting_neuronal_behavioural(X,B, behaviour_labels=[], vmin=0, vmax=2):
     plt.ylabel("Behaviour")
     plt.yticks([])
 
+def plot_phase_space(Y, B, state_names, show_points=True):
+    '''
+    Function to plot latent embedding Y (phase space trajectories) and colour them according to
+    behaviour
+    '''
+    fig = plt.figure(figsize=(8,8))
+    ax = plt.axes(projection='3d')
+    print(state_names)
+    plot_ps_(fig, ax, Y=Y, B=B, state_names=state_names, show_points=show_points)
+    return fig, ax
 
-def plot_phase_space(pca_neurons, states, show_points=False, state_names = ['Dorsal turn', 'Forward', 'No state', 'Reverse-1', 'Reverse-2', 'Sustained reverse', 'Slowing', 'Ventral turn']):
-    if pca_neurons.shape[1]==3:
-        fig = plt.figure(figsize=(8,8))
-        ax = plt.axes(projection='3d')
-        X = pca_neurons.T
-        points = np.array(X).T.reshape(-1, 1, 3)
+def plot_ps_(fig, ax, Y, B, state_names, show_points=True):
+    if Y.shape[1]==3:
+        points = np.array(Y.T).T.reshape(-1, 1, 3)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
-        colors = [*mcolors.TABLEAU_COLORS.keys()][:8] ###
+        colors = [*mcolors.TABLEAU_COLORS.keys()][:8]
         #cmap = cm.get_cmap('Pastel1')
         #colors = cmap(np.arange(8))
-        for segment, state in zip(segments, states[:-1]):
+        for segment, state in zip(segments, B[:-1]):
             p = ax.plot3D(segment.T[0], segment.T[1], segment.T[2], color=colors[state] )
         # Create legend
         legend_elements = [Line2D([0], [0], color=c, lw=4, label=state) for c, state in zip(colors, state_names)]
         ax.legend(handles=legend_elements)
         plt.show()
-    elif pca_neurons.shape[1]==2:
-        fig = plt.figure(figsize=(8,8))
-        ax = plt.axes()
-        X = pca_neurons.T
-        points = np.array(X).T.reshape(-1, 1, 2)
-        segments = np.concatenate([points[:-1], points[1:]], axis=1)
-        colors = [*mcolors.TABLEAU_COLORS.keys()][:8]
-        #cmap = cm.get_cmap('Pastel1')
-        #colors = cmap(np.arange(8))
-        for segment, state in zip(segments, states[:-1]):
-            p = ax.plot(segment.T[0], segment.T[1], color=colors[state])
-        # Create legend
-        legend_elements = [Line2D([0], [0], color=c, lw=4, label=state) for c, state in zip(colors, state_names)]
-        ax.legend(handles=legend_elements)
     else:
-        print("Error: Dimension of input array is neither 2 or 3")
+        print("Error: Dimension of input array is not 3")
      
     if show_points==True:
-    	ax.scatter(X[0], X[1], X[2], c='k',s=0.2)
-    return ax
+        print(Y.shape)
+        ax.scatter(Y[0], Y[1], Y[2], c='k',s=0.2)
+    return fig, ax
         
-def rotating_plot(Y, B, show_points=False, filename='rotation.gif', state_names = ['Dorsal turn', 'Forward', 'No state', 'Reverse-1', 'Reverse-2', 'Sustained reverse', 'Slowing', 'Ventral turn']):
+def rotating_plot(Y, B, state_names, show_points=True, filename='rotation.gif'):
+    '''
+    Created rotating plot of latent space embedding
+    '''
     fig = plt.figure(figsize=(8,8))
     ax = plt.axes(projection='3d')
     def rotate(angle):
         ax.view_init(azim=angle)
 
-    points = np.array(Y.T).T.reshape(-1, 1, 3)
-    segments = np.concatenate([points[:-1], points[1:]], axis=1)
-    colors = [*mcolors.TABLEAU_COLORS.keys()][:8] ###
-    #cmap = cm.get_cmap('Pastel1')
-    #colors = cmap(np.arange(8))
-    for segment, state in zip(segments, B[:-1]):
-        p = ax.plot3D(segment.T[0], segment.T[1], segment.T[2], color=colors[state] )
-    # Create legend
-    legend_elements = [Line2D([0], [0], color=c, lw=4, label=state) for c, state in zip(colors, state_names)]
-    ax.legend(handles=legend_elements)
-    if show_points==True:
-    	ax.scatter(Y[:,0], Y[:,1], Y[:,2], c='k',s=0.2)
+    fig, ax = plot_ps_(fig, ax, Y=Y, B=B, state_names=state_names, show_points=show_points)
     rot_animation = animation.FuncAnimation(fig, rotate, frames=np.arange(0, 362, 5), interval=150)
     rot_animation.save(filename, dpi=80, writer='imagemagick')
     plt.show()
     return ax
+
