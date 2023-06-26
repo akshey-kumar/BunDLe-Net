@@ -2,6 +2,7 @@ import sys
 sys.path.append(r'../')
 import mat73
 import numpy as np
+import seaborn as sns
 from tqdm import tqdm
 from scipy import signal
 from matplotlib import cm
@@ -10,6 +11,7 @@ from mpl_toolkits import mplot3d
 import matplotlib.colors as mcolors
 from matplotlib.lines import Line2D
 import matplotlib.animation as animation
+from matplotlib.colors import ListedColormap
 
 import tensorflow as tf
 from tensorflow import keras
@@ -255,22 +257,19 @@ class BunDLeNet(Model):
         super(BunDLeNet, self).__init__()
         self.latent_dim = latent_dim
         self.tau = tf.keras.Sequential([
-            tf.keras.layers.Flatten(),
+            layers.Flatten(),
             layers.Dense(50, activation='relu'),
             layers.Dense(30, activation='relu'),
             layers.Dense(25, activation='relu'),
             layers.Dense(10, activation='relu'),
             layers.Dense(latent_dim, activation='linear'),
-            layers.Normalization(axis=-1),
+            layers.Normalization(axis=-1), 
             layers.GaussianNoise(0.05)
         ])
         self.T_Y = tf.keras.Sequential([
             layers.Dense(latent_dim, activation='linear'),
-            layers.Normalization(axis=-1)
-        ])
-        self.predictor = tf.keras.Sequential([
-            layers.Dense(8, activation='relu'),
-            layers.Dense(8)
+            layers.Normalization(axis=-1),
+            
         ])
         self.predictor = tf.keras.Sequential([
             layers.Dense(8, activation='linear')
@@ -352,7 +351,6 @@ def pca_initialisation(X_, tau, latent_dim):
     pca = PCA(n_components = latent_dim, whiten=True)
     pca.fit(X_pca)
     Y0_ = pca.transform(X_pca)
-    
     ### Training tau to reproduce the PCA
     class PCA_encoder(Model):
       def __init__(self, latent_dim):
@@ -364,7 +362,7 @@ def pca_initialisation(X_, tau, latent_dim):
         return encoded
 
     pcaencoder = PCA_encoder(latent_dim = latent_dim)
-    opt = tf.keras.optimizers.Adam(learning_rate=0.01)
+    opt = tf.keras.optimizers.legacy.Adam(learning_rate=0.01)
     pcaencoder.compile(optimizer=opt,
                   loss='mse',
                   metrics=['mse'])
@@ -412,8 +410,9 @@ def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=
     return loss_array
 
 ####################################################
-################ Evaluation Metrics ################
+#################### Evaluation ####################
 ####################################################
+flat_partial = lambda x: x.reshape(x.shape[0],-1)
 
 def r2_single(y_true, y_pred):
     mse = tf.keras.losses.MeanSquaredError()
@@ -436,60 +435,87 @@ def hits_at_rank(rank, Y_test, Y_pred):
 ########## Plotting functions ########## 
 ########################################
 
-def plotting_neuronal_behavioural(X,B, behaviour_labels=[], vmin=0, vmax=2):
+def plotting_neuronal_behavioural(X,B, state_names=[], vmin=0, vmax=2):
     fig, axs = plt.subplots(2,1,figsize=(10,4))
     im0 = axs[0].imshow(X.T,aspect='auto', vmin=vmin,vmax=vmax, interpolation='None')
+    # tell the colorbar to tick at integers
+    cax0 = plt.colorbar(im0)
     axs[0].set_xlabel("time $t$")
     axs[0].set_ylabel("Neuronal activation")
     
     # get discrete colormap
-    cmap = plt.get_cmap('RdBu', np.max(B) - np.min(B) + 1)
-    mat = axs[1].imshow([B], cmap=cmap, vmin=np.min(B) - 0.5, 
-                      vmax=np.max(B) + 0.5 , aspect='auto')
+    colors = sns.color_palette('pastel', len(state_names))
+    cmap = cm.colors.ListedColormap(colors)
+    cmap = plt.get_cmap('Pastel1', np.max(B) - np.min(B) + 1)
+    im1 = axs[1].imshow([B], cmap=cmap, vmin=np.min(B) - 0.5, vmax=np.max(B) + 0.5 , aspect='auto')
     # tell the colorbar to tick at integers
-    cax = plt.colorbar(mat, ticks=np.arange(np.min(B), np.max(B) + 1), orientation='horizontal', pad=0.4)
-    if behaviour_labels != []:
-        cax.ax.set_xticklabels(behaviour_labels)
-    plt.xlabel("time $t$")
-    plt.ylabel("Behaviour")
-    plt.yticks([])
+    cax = plt.colorbar(im1, ticks=np.arange(np.min(B), np.max(B) + 1))
+    if state_names != []:
+        cax.ax.set_yticklabels(state_names)
+    axs[1].set_xlabel("time $t$")
+    axs[1].set_ylabel("Behaviour")
+    axs[1].set_yticks([])
+    plt.show()
 
-def plot_phase_space(Y, B, state_names, show_points=True):
+
+def plot_phase_space(Y, B, state_names, show_points=True, legend=True, **kwargs):
     fig = plt.figure(figsize=(8,8))
     ax = plt.axes(projection='3d')
-    plot_ps_(fig, ax, Y=Y, B=B, state_names=state_names, show_points=show_points)
+    plot_ps_(fig, ax, Y=Y, B=B, state_names=state_names, show_points=show_points, legend=legend, **kwargs)
+    plt.show()
     return fig, ax
 
-def plot_ps_(fig, ax, Y, B, state_names, show_points=True):
-    if Y.shape[1]==3:
+def plot_ps_(fig, ax, Y, B, state_names, show_points=True, legend=True, colors=None, **kwargs):
+    if Y.shape[1] == 3:
         points = np.array(Y.T).T.reshape(-1, 1, 3)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
-        colors = [*mcolors.TABLEAU_COLORS.keys()][:8]
-        #cmap = cm.get_cmap('Pastel1')
-        #colors = cmap(np.arange(8))
+        if colors is None:
+            colors = sns.color_palette('deep', len(state_names))
         for segment, state in zip(segments, B[:-1]):
-            p = ax.plot3D(segment.T[0], segment.T[1], segment.T[2], color=colors[state] )
+            p = ax.plot(segment.T[0], segment.T[1], segment.T[2], color=colors[state], **kwargs)
+        ax.set_axis_off()  
+    else:
+        print("Error: Dimension of input array is not 3")
+    if legend == True:
         # Create legend
         legend_elements = [Line2D([0], [0], color=c, lw=4, label=state) for c, state in zip(colors, state_names)]
         ax.legend(handles=legend_elements)
-        plt.show()
-    else:
-        print("Error: Dimension of input array is not 3")
-     
-    if show_points==True:
-        ax.scatter(Y[0], Y[1], Y[2], c='k',s=0.2)
+    elif legend == 'colorbar':
+        # Create a colormap and colorbar
+        cmap = cm.colors.ListedColormap(colors)
+        norm = cm.colors.Normalize(vmin=0, vmax=len(state_names)-1)
+        sm = cm.ScalarMappable(cmap=cmap, norm=norm)
+        sm.set_array([])
+        cbar = plt.colorbar(sm, ticks=range(len(state_names)))
+        cbar.ax.set_yticklabels(state_names)
+    if show_points == True:
+        ax.scatter(Y[:,0], Y[:,1], Y[:,2], c=B, s=1, cmap = ListedColormap(colors))
+        print(Y[:,0].shape)
     return fig, ax
-        
-def rotating_plot(Y, B, state_names, show_points=True, filename='rotation.gif'):
+
+
+def rotating_plot(Y, B, state_names, show_points=True, legend=True, filename='rotation.gif', **kwargs):
     fig = plt.figure(figsize=(8,8))
     ax = plt.axes(projection='3d')
+
     def rotate(angle):
         ax.view_init(azim=angle)
 
-    fig, ax = plot_ps_(fig, ax, Y=Y, B=B, state_names=state_names, show_points=show_points)
+    fig, ax = plot_ps_(fig, ax, Y=Y, B=B, state_names=state_names, show_points=show_points, legend=legend, **kwargs)
     rot_animation = animation.FuncAnimation(fig, rotate, frames=np.arange(0, 362, 5), interval=150)
     rot_animation.save(filename, dpi=80, writer='imagemagick')
     plt.show()
     return ax
 
 
+def plot_latent_timeseries(Y, B, state_names):
+    plt.figure(figsize=(19,5))
+    cmap = plt.get_cmap('Pastel1', np.max(B) - np.min(B) + 1)
+    im = plt.imshow([B],aspect=600,cmap=cmap, vmin=np.min(B) - 0.5, vmax=np.max(B) + 0.5)
+    #cbar = plt.colorbar(ticks=np.arange(len(state_names)))
+    cbar = plt.colorbar(im, ticks=np.arange(np.min(B), np.max(B) + 1))
+    cbar.ax.set_yticklabels(state_names) 
+    plt.plot(Y/np.max(np.abs(Y))/3)
+    plt.xlabel("time $t$")
+    plt.axis([0,Y.shape[0],-0.5,0.5])
+    plt.show()
