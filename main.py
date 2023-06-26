@@ -4,22 +4,27 @@ import numpy as np
 from functions import *
 
 ### Load Data (and excluding behavioural neurons)
-worm_num = 4
+worm_num = 0
 b_neurons = [
-    'AVAR',
-    'AVAL',
-    'SMDVR',
-    'SMDVL',
-    'SMDDR',
-    'SMDDL',
-    'RIBR',
-    'RIBL',]
+	'AVAR',
+	'AVAL',
+	'SMDVR',
+	'SMDVL',
+	'SMDDR',
+	'SMDDL',
+	'RIBR',
+	'RIBL',]
 data = Database(data_set_no=worm_num)
 data.exclude_neurons(b_neurons)
 X = data.neuron_traces.T
 B = data.states
+<<<<<<< Updated upstream
 state_names = data.state_names
 plotting_neuronal_behavioural(X, B)
+=======
+state_names = ['Dorsal turn', 'Forward', 'No state', 'Reverse-1', 'Reverse-2', 'Sustained reversal', 'Slowing', 'Ventral turn']
+#plotting_neuronal_behavioural(X, B, state_names=state_names)
+>>>>>>> Stashed changes
 
 ### Preprocess and prepare data for BundLe Net
 time, X = preprocess_data(X, data.fps)
@@ -29,8 +34,12 @@ X_, B_ = prep_data(X, B, win=15)
 ### Deploy BunDLe Net
 model = BunDLeNet(latent_dim=3)
 model.build(input_shape=X_.shape)
+<<<<<<< Updated upstream
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
 
+=======
+optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=0.001)
+>>>>>>> Stashed changes
 
 #X_train, X_test, B_train, B_test = timeseries_train_test_split(X_, B_)
 loss_array = train_model(
@@ -45,11 +54,18 @@ loss_array = train_model(
 
 # Training losses vs epochs
 plt.figure()
+<<<<<<< Updated upstream
 for i, label in  enumerate(["DCC_loss", "behaviour_loss","total_loss" ]):
     plt.plot(loss_array[:,i], label=label)
 plt.legend()
 #plt.ylim(0,.01)
+=======
+for i, label in  enumerate(["$\mathcal{L}_{{Markov}}$", "$\mathcal{L}_{{Behavior}}$","Total loss $\mathcal{L}$" ]):
+	plt.plot(loss_array[:,i], label=label)
+>>>>>>> Stashed changes
 
+plt.legend()
+plt.show()
 
 ### Projecting into latent space
 Y0_ = model.tau(X_[:,0]).numpy() 
@@ -61,6 +77,7 @@ algorithm = 'BunDLeNet'
 # B_ = np.loadtxt('data/generated/saved_Y/B__' + algorithm + '_worm_' + str(worm_num)).astype(int)
 
 ### Plotting latent space dynamics
+<<<<<<< Updated upstream
 plt.figure(figsize=(19,5))
 plt.imshow([B_],aspect=600,cmap="Pastel1")
 cbar = plt.colorbar(ticks=np.arange(8))
@@ -70,12 +87,18 @@ plt.xlabel("time $t$")
 plt.axis([0,Y0_.shape[0],-0.5,0.5])
 
 plot_phase_space(Y0_, B_, state_names = state_names)
+=======
+plot_latent_timeseries(Y0_, B_, state_names)
+
+plot_phase_space(Y0_, B_, state_names = state_names, colors = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d', '#666666'] )
+>>>>>>> Stashed changes
 ### Run to produce rotating 3-D plot
 #rotating_plot(Y0_, B_,filename='rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names)
 
 ### Performing PCA on the latent dimension (to check if there are redundant or correlated components)
 pca = PCA()
 Y_pca = pca.fit_transform(Y0_)
+<<<<<<< Updated upstream
 plt.figure(figsize=(19,5))
 plt.imshow([B_],aspect=600,cmap="Pastel1")
 cbar = plt.colorbar(ticks=np.arange(8))
@@ -85,18 +108,21 @@ plt.xlabel("time $t$")
 plt.ylabel("$Y_{pca}$")
 plt.axis([0,Y_pca.shape[0],-0.5,0.5])
 
+=======
+plot_latent_timeseries(Y_pca, B_, state_names)
+>>>>>>> Stashed changes
 
-plt.figure(figsize=(15,3))
-plt.imshow([B_],aspect="auto",cmap="Pastel1")
-plt.plot(Y_pca[:,2]/3/np.max(np.abs(Y_pca[:,2])), color = 'green')
+# Checking if the third PC shows any structure
+#plot_latent_timeseries(Y_pca[:,2], B_, state_names)
 
-### Behaviour predictor (implicit in the AbC net)
+### Behaviour predictor (implicit in the BunDLe Net)
 Y0_ = model.tau(X_[:,0]).numpy() # Y_t
 Y1_ = model.tau(X_[:,1]).numpy()
 B_pred = model.predictor(Y1_).numpy().argmax(axis=1)
 accuracy_score(B_pred, B_)
 plt.show()
 
+<<<<<<< Updated upstream
 
 # ### Linear response
 # def linear_response(m):
@@ -104,6 +130,45 @@ plt.show()
 # 	for i, y0_ in enumerate(Y0_):
 # 		linear_response += X_[i,0]*Y0_[i,m]
 # 	return linear_response
+=======
+### Dynamics model (implicit in the BunDLe Net)
+Y1_pred = Y0_ + model.T_Y(Y0_).numpy()
+fig = plt.figure(figsize=(8,8))
+ax = plt.axes(projection='3d')
+plot_ps_(fig, ax, Y=Y1_, B=np.zeros_like(B_), state_names=["True Y"], legend=True, show_points=False, colors = ['gray'], linestyle=':')
+plot_ps_(fig, ax, Y=Y1_pred, B=np.zeros_like(B_), state_names=["Predicted Y"], legend=True, show_points=False, colors = ['#377eb8'])
+plt.show()
+
+
+
+
+# Enable LaTeX rendering
+plt.rcParams['text.usetex'] = True
+
+# Dynamics model (implicit in the BunDLe Net)
+Y1_pred = Y0_ + model.T_Y(Y0_).numpy()
+fig = plt.figure(figsize=(4, 4))
+ax = plt.axes(projection='3d')
+true_y_line = ax.plot(Y1_[:, 0], Y1_[:, 1], Y1_[:, 2], color='gray', linewidth=.6, linestyle='--', label=r'True $Y_{t+1}$') #label=r'$Y^U_{t+1} = \tau(X_{t+1})$')
+predicted_y_line = ax.plot(Y1_pred[:, 0], Y1_pred[:, 1], Y1_pred[:, 2], color='#377eb8',  linewidth=.6,  label=r'Predicted $Y_{t+1}$')#label=r'$Y^L_{t+1} = T_Y(Y_t) $')
+ax.set_axis_off()  
+plt.legend(handles=[true_y_line[0], predicted_y_line[0]])
+plt.show()
+
+### Mean pariwise distance analysis
+# pd_Y = np.linalg.norm(Y0_[:, np.newaxis] - Y0_, axis=-1) < 0.8
+# plt.matshow(pd_Y, cmap='Greys')
+# #plt.colorbar()
+# plot_latent_timeseries(Y0_, B_, state_names)
+# plt.show()
+
+# ### Linear response
+# def linear_response(m):
+#   linear_response = np.zeros_like(X_[0,0])
+#   for i, y0_ in enumerate(Y0_):
+#       linear_response += X_[i,0]*Y0_[i,m]
+#   return linear_response
+>>>>>>> Stashed changes
 # plt.figure()
 # plt.imshow(linear_response(0))
 # plt.figure()
@@ -111,3 +176,10 @@ plt.show()
 # plt.figure()
 # plt.imshow(linear_response(2))
 # plt.show()
+<<<<<<< Updated upstream
+=======
+
+
+
+
+>>>>>>> Stashed changes
