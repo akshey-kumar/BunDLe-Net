@@ -122,8 +122,3 @@ plt.show()
 # plt.figure()
 # plt.imshow(linear_response(2))
 # plt.show()
-
-
-
-
->>>>>>> Stashed changes
