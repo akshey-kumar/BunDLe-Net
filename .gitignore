@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# mac
+.DS_Store
+
 # Distribution / packaging
 .Python
 build/
@@ -77,6 +80,7 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+.ipynb_checkpoints/
 
 # IPython
 profile_default/
@@ -124,6 +128,7 @@ celerybeat.pid
 .venv
 env/
 venv/
+env_hackathon/
 ENV/
 env.bak/
 venv.bak/
