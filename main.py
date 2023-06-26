@@ -54,6 +54,8 @@ plt.show()
 Y0_ = model.tau(X_[:,0]).numpy() 
 
 algorithm = 'BunDLeNet'
+# Save the weights
+model.save_weights('data/generated/BunDLeNet_model')
 # np.savetxt('data/generated/saved_Y/Y0__' + algorithm + '_worm_' + str(worm_num), Y0_)
 # np.savetxt('data/generated/saved_Y/B__' + algorithm + '_worm_' + str(worm_num), B_)
 # Y0_ = np.loadtxt('data/generated/saved_Y/Y0__' + algorithm + '_worm_' + str(worm_num))
@@ -80,17 +82,6 @@ Y1_ = model.tau(X_[:,1]).numpy()
 B_pred = model.predictor(Y1_).numpy().argmax(axis=1)
 accuracy_score(B_pred, B_)
 plt.show()
-
-### Dynamics model (implicit in the BunDLe Net)
-Y1_pred = Y0_ + model.T_Y(Y0_).numpy()
-fig = plt.figure(figsize=(8,8))
-ax = plt.axes(projection='3d')
-plot_ps_(fig, ax, Y=Y1_, B=np.zeros_like(B_), state_names=["True Y"], legend=True, show_points=False, colors = ['gray'], linestyle=':')
-plot_ps_(fig, ax, Y=Y1_pred, B=np.zeros_like(B_), state_names=["Predicted Y"], legend=True, show_points=False, colors = ['#377eb8'])
-plt.show()
-
-# Enable LaTeX rendering
-plt.rcParams['text.usetex'] = True
 
 # Dynamics model (implicit in the BunDLe Net)
 Y1_pred = Y0_ + model.T_Y(Y0_).numpy()
