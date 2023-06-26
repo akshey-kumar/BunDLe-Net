@@ -129,6 +129,7 @@ celerybeat.pid
 env/
 venv/
 env_hackathon/
+bundle_env/
 ENV/
 env.bak/
 venv.bak/
