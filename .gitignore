@@ -128,7 +128,10 @@ celerybeat.pid
 .venv
 env/
 venv/
+<<<<<<< Updated upstream
 env_hackathon/
+=======
+>>>>>>> Stashed changes
 bundle_env/
 ENV/
 env.bak/
