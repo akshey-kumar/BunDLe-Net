@@ -490,7 +490,6 @@ def plot_ps_(fig, ax, Y, B, state_names, show_points=True, legend=True, colors=N
         cbar.ax.set_yticklabels(state_names)
     if show_points == True:
         ax.scatter(Y[:,0], Y[:,1], Y[:,2], c=B, s=1, cmap = ListedColormap(colors))
-        print(Y[:,0].shape)
     return fig, ax
 
 
