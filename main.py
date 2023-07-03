@@ -34,9 +34,9 @@ optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=0.001)
 
 #X_train, X_test, B_train, B_test = timeseries_train_test_split(X_, B_)
 loss_array = train_model(X_,
-			 B_, 
+			 B_,
 			 model,
-			 optimizer, 
+			 optimizer,
 			 gamma=0.9, 
 			 n_epochs=1000,
 			 pca_init=True
