@@ -38,7 +38,7 @@ loss_array = train_model(X_,
 			 model,
 			 optimizer,
 			 gamma=0.9, 
-			 n_epochs=1000,
+			 n_epochs=2000,
 			 pca_init=True
 						 )
 
