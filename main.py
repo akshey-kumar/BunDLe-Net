@@ -32,13 +32,13 @@ model = BunDLeNet(latent_dim=3)
 model.build(input_shape=X_.shape)
 optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=0.001)
 
-#X_train, X_test, B_train, B_test = timeseries_train_test_split(X_, B_)
+
 loss_array = train_model(X_,
 			 B_,
 			 model,
 			 optimizer,
 			 gamma=0.9, 
-			 n_epochs=2000,
+			 n_epochs=1000,
 			 pca_init=True
 						 )
 
@@ -55,7 +55,7 @@ Y0_ = model.tau(X_[:,0]).numpy()
 
 algorithm = 'BunDLeNet'
 # Save the weights
-model.save_weights('data/generated/BunDLeNet_model')
+#model.save_weights('data/generated/BunDLeNet_model')
 # np.savetxt('data/generated/saved_Y/Y0__' + algorithm + '_worm_' + str(worm_num), Y0_)
 # np.savetxt('data/generated/saved_Y/B__' + algorithm + '_worm_' + str(worm_num), B_)
 # Y0_ = np.loadtxt('data/generated/saved_Y/Y0__' + algorithm + '_worm_' + str(worm_num))
@@ -77,11 +77,13 @@ plot_latent_timeseries(Y_pca, B_, state_names)
 #plot_latent_timeseries(Y_pca[:,2], B_, state_names)
 
 ### Behaviour predictor (implicit in the BunDLe Net)
+#model.load_weights('data/generated/BunDLeNet_model')
 Y0_ = model.tau(X_[:,0]).numpy() # Y_t
 Y1_ = model.tau(X_[:,1]).numpy()
 B_pred = model.predictor(Y1_).numpy().argmax(axis=1)
 accuracy_score(B_pred, B_)
 plt.show()
+
 
 # Dynamics model (implicit in the BunDLe Net)
 Y1_pred = Y0_ + model.T_Y(Y0_).numpy()
@@ -89,6 +91,18 @@ fig = plt.figure(figsize=(4, 4))
 ax = plt.axes(projection='3d')
 true_y_line = ax.plot(Y1_[:, 0], Y1_[:, 1], Y1_[:, 2], color='gray', linewidth=.6, linestyle='--', label=r'True $Y_{t+1}$') #label=r'$Y^U_{t+1} = \tau(X_{t+1})$')
 predicted_y_line = ax.plot(Y1_pred[:, 0], Y1_pred[:, 1], Y1_pred[:, 2], color='#377eb8',  linewidth=.6,  label=r'Predicted $Y_{t+1}$')#label=r'$Y^L_{t+1} = T_Y(Y_t) $')
+
+## Time evolution
+y_start = Y0_[1241]
+y_t = y_start
+Y_evolved = np.zeros((100,3))
+for i in range(100):
+	y_t = y_t + model.T_Y(y_t.reshape(1,3)).numpy()
+	Y_evolved[i] = y_t[0]
+
+ax.scatter(y_start[0], y_start[1], y_start[2], c='r')
+evolved_y_line = ax.scatter(Y_evolved[:, 0], Y_evolved[:, 1], Y_evolved[:, 2], color='k', s=0.5,  label=r'Simulated $Y_{t+1}$')
+
 ax.set_axis_off()  
 plt.legend(handles=[true_y_line[0], predicted_y_line[0]])
 plt.show()

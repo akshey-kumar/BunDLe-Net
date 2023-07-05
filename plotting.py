@@ -26,8 +26,8 @@ for worm_num in range(5):
 '''
 
 ### figure 2 - comparison of various algorithms
-elev = [64, 171, 94, 38, 27, -3, -28, -148]
-azim = [-126, -146, -142, -146, -128, -107, -45, 154]
+elev = [64, 171, 94, 38, 27, 27, -22, -148]
+azim = [-126, -146, -142, -146, -128, -119, -41, 161]
 
 worm_num = 0
 algorithms = ['PCA', 'tsne', 'autoencoder', 'autoregressor', 'cebra_B', 'cebra_time', 'cebra_hybrid', 'AbCNet']
