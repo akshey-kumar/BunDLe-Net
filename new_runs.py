@@ -4,7 +4,7 @@ import numpy as np
 from functions import *
 
 ### Load Data (and excluding behavioural neurons)
-for worm_num in range(5):
+for worm_num in [2,3]:
     b_neurons = [
         'AVAR',
         'AVAL',
@@ -36,51 +36,17 @@ for worm_num in range(5):
                  model,
                  optimizer,
                  gamma=0.9, 
-                 n_epochs=100,
-                 pca_init=True
+                 n_epochs=3000,
+                 pca_init=False
                              )
     ### Projecting into latent space
     Y0_ = model.tau(X_[:,0]).numpy() 
 
     algorithm = 'BunDLeNet'
     # Save the weights
-    model.save_weights('data/generated/BunDLeNet_model')
-    np.savetxt('data/generated/saved_Y/new_runs/Y0__' + algorithm + '_worm_' + str(worm_num), Y0_)
-    np.savetxt('data/generated/saved_Y/new_runs/B__' + algorithm + '_worm_' + str(worm_num), B_)
-    # Y0_ = np.loadtxt('data/generated/saved_Y/new_runs/Y0__' + algorithm + '_worm_' + str(worm_num))
-    # B_ = np.loadtxt('data/generated/saved_Y/new_runs/B__' + algorithm + '_worm_' + str(worm_num)).astype(int)
+    model.save_weights('data/generated/BunDLeNet_model_worm_' + str(worm_num))
+    np.savetxt('data/generated/saved_Y/new_runs_3000_epochs/Y0__' + algorithm + '_worm_' + str(worm_num), Y0_)
+    np.savetxt('data/generated/saved_Y/new_runs_3000_epochs/B__' + algorithm + '_worm_' + str(worm_num), B_)
+    
+    #plot_phase_space(Y0_, B_, state_names = state_names)
 
-    plot_phase_space(Y0_, B_, state_names = state_names)
-
-exit()
-### Plotting latent space dynamics
-plot_latent_timeseries(Y0_, B_, state_names)
-
-plot_phase_space(Y0_, B_, state_names = state_names, colors = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d', '#666666'] )
-### Run to produce rotating 3-D plot
-#rotating_plot(Y0_, B_,filename='rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names)
-
-### Performing PCA on the latent dimension (to check if there are redundant or correlated components)
-pca = PCA()
-Y_pca = pca.fit_transform(Y0_)
-plot_latent_timeseries(Y_pca, B_, state_names)
-
-# Checking if the third PC shows any structure
-#plot_latent_timeseries(Y_pca[:,2], B_, state_names)
-
-### Behaviour predictor (implicit in the BunDLe Net)
-Y0_ = model.tau(X_[:,0]).numpy() # Y_t
-Y1_ = model.tau(X_[:,1]).numpy()
-B_pred = model.predictor(Y1_).numpy().argmax(axis=1)
-accuracy_score(B_pred, B_)
-plt.show()
-
-# Dynamics model (implicit in the BunDLe Net)
-Y1_pred = Y0_ + model.T_Y(Y0_).numpy()
-fig = plt.figure(figsize=(4, 4))
-ax = plt.axes(projection='3d')
-true_y_line = ax.plot(Y1_[:, 0], Y1_[:, 1], Y1_[:, 2], color='gray', linewidth=.6, linestyle='--', label=r'True $Y_{t+1}$') #label=r'$Y^U_{t+1} = \tau(X_{t+1})$')
-predicted_y_line = ax.plot(Y1_pred[:, 0], Y1_pred[:, 1], Y1_pred[:, 2], color='#377eb8',  linewidth=.6,  label=r'Predicted $Y_{t+1}$')#label=r'$Y^L_{t+1} = T_Y(Y_t) $')
-ax.set_axis_off()  
-plt.legend(handles=[true_y_line[0], predicted_y_line[0]])
-plt.show()

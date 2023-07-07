@@ -496,7 +496,7 @@ def rotating_plot(Y, B, state_names, show_points=True, legend=True, filename='ro
 
     fig, ax = plot_ps_(fig, ax, Y=Y, B=B, state_names=state_names, show_points=show_points, legend=legend, **kwargs)
     rot_animation = animation.FuncAnimation(fig, rotate, frames=np.arange(0, 362, 5), interval=150)
-    rot_animation.save(filename, dpi=80, writer='imagemagick')
+    rot_animation.save(filename, dpi=150, writer='imagemagick')
     plt.show()
     return ax
 
