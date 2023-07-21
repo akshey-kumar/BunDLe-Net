@@ -40,7 +40,7 @@ optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=0.001)
 #            pca_init=True)
 
 
-'''
+"""
 ### figure 1 - bundle net on many worms see new_runs.py
 algorithm = 'BunDLeNet'
 elev = [-45,0,22,-40,-35]
@@ -58,13 +58,30 @@ for worm_num in range(5):
     plot_ps_(fig, ax, Y=Y0_, B=B_, state_names=state_names, show_points=False, legend=True)
     #plt.savefig('figures/figure_1/Y0_' + algorithm + '_worm_' + str(worm_num) + '.pdf', transparent=True)
     plt.show()
-    rotating_plot(Y=Y0_, B=B_, filename='figures/rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=False, show_points=False)
-    
+    #rotating_plot(Y=Y0_, B=B_, filename='figures/rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=False, show_points=False)
+"""
 '''
+### figure 1 - attempt 2 (comparable embeddings)
+algorithm = 'BunDLeNet'
+elev = -161
+azim = 61
+
+for worm_num in range(5):
+    print(worm_num)
+    Y0_ = np.loadtxt('data/generated/saved_Y/comparable_embeddings/Y0__' + algorithm + '_worm_' + str(worm_num))
+    B_ = np.loadtxt('data/generated/saved_Y/comparable_embeddings/B__' + algorithm + '_worm_' + str(worm_num)).astype(int)
+    
+    fig = plt.figure(figsize=(8,8))
+    ax = plt.axes(projection='3d')
+    ax.view_init(elev=elev, azim=azim, roll=0)
+    plot_ps_(fig, ax, Y=Y0_, B=B_, state_names=state_names, show_points=False, legend=False)
+    #plt.savefig('figures/figure_1/comparable_embeddings/Y0_' + algorithm + '_worm_' + str(worm_num) + '.pdf', transparent=True)
+    #rotating_plot(Y=Y0_, B=B_, filename='figures/comparable_embeddings/rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=False, show_points=False)
+plt.show()
 
 ### figure 2 - comparison of various algorithms
-elev = [64, 171, 94, 38, 27, 27, -22, -148]
-azim = [-126, -146, -142, -146, -128, -119, -41, 161]
+elev = [-117, 171, 94, 38, 27, 27, -22, -148]
+azim = [-66, -146, -142, -146, -128, -119, -41, 161]
 
 worm_num = 0
 algorithms = ['PCA', 'tsne', 'autoencoder', 'autoregressor', 'cebra_B', 'cebra_time', 'cebra_hybrid', 'AbCNet']
@@ -73,14 +90,15 @@ for i, algorithm in enumerate(algorithms):
     Y0_ = np.loadtxt('data/generated/saved_Y/comparison_algorithms/Y0_tr__' + algorithm + '.csv')
     B_ = np.loadtxt('data/generated/saved_Y/comparison_algorithms/B_train_1__' + algorithm + '.csv').astype(int)
     Y0_ = 2*Y0_/np.std(Y0_)
-    # fig = plt.figure(figsize=(8,8))
-    # ax = plt.axes(projection='3d')
-    # ax.view_init(elev=elev[i], azim=azim[i], roll=0)
-    # plot_ps_(fig, ax, Y=Y0_, B=B_, state_names=state_names, show_points=False, legend=False)
-    # plt.savefig('figures/figure_2/Y0_' + algorithm + '.pdf', transparent=True)
-    # plt.show()
-    rotating_plot(Y=Y0_, B=B_, filename='figures/rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=False, show_points=False)
-'''
+    fig = plt.figure(figsize=(8,8))
+    ax = plt.axes(projection='3d')
+    ax.view_init(elev=elev[i], azim=azim[i], roll=0)
+    plot_ps_(fig, ax, Y=Y0_, B=B_, state_names=state_names, show_points=False, legend=False)
+    plt.savefig('figures/figure_2/Y0_' + algorithm + '.pdf', transparent=True)
+    plt.show()
+    #rotating_plot(Y=Y0_, B=B_, filename='figures/rotation_'+ algorithm + '_worm_'+str(worm_num) +'_pts.gif', state_names=state_names, legend=False, show_points=False)
+
+
 
 ### figure 3 - see dcc-methods/Results for paper/plotting
 
@@ -154,3 +172,35 @@ for i in range(delta_epochs,epochs,delta_epochs):
 
 
 '''
+
+### figure 7 - distinct behavioural motifs
+algorithm = 'BunDLeNet'
+elev = [13, -47]
+azim = [-148, 60]
+for i, worm_num in enumerate([0, 0]):
+    print(worm_num)
+    Y0_ = np.loadtxt('data/generated/saved_Y/comparable_embeddings/Y0__' + algorithm + '_worm_' + str(worm_num))
+    B_ = np.loadtxt('data/generated/saved_Y/comparable_embeddings/B__' + algorithm + '_worm_' + str(worm_num)).astype(int)
+    
+    fig = plt.figure(figsize=(8,8))
+    ax = plt.axes(projection='3d')
+    ax.view_init(elev=elev[i], azim=azim[i], roll=0)
+    plot_ps_(fig, ax, Y=Y0_, B=B_, state_names=state_names, show_points=False, legend=False)
+    #plt.savefig('figures/figure_1/comparable_embeddings/Y0_' + algorithm + '_worm_' + str(worm_num) + '.pdf', transparent=True)
+    #rotating_plot(Y=Y0_, B=B_, filename='figures/comparable_embeddings/rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=False, show_points=False)
+
+
+elev = [167, -52]
+azim = [41, 104]
+for i, worm_num in enumerate([1, 1]):
+    print(worm_num)
+    Y0_ = np.loadtxt('data/generated/saved_Y/comparable_embeddings/Y0__' + algorithm + '_worm_' + str(worm_num))
+    B_ = np.loadtxt('data/generated/saved_Y/comparable_embeddings/B__' + algorithm + '_worm_' + str(worm_num)).astype(int)
+    
+    fig = plt.figure(figsize=(8,8))
+    ax = plt.axes(projection='3d')
+    ax.view_init(elev=elev[i], azim=azim[i], roll=0)
+    plot_ps_(fig, ax, Y=Y0_, B=B_, state_names=state_names, show_points=False, legend=False)
+    #plt.savefig('figures/figure_1/comparable_embeddings/Y0_' + algorithm + '_worm_' + str(worm_num) + '.pdf', transparent=True)
+    #rotating_plot(Y=Y0_, B=B_, filename='figures/comparable_embeddings/rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=False, show_points=False)
+plt.show()

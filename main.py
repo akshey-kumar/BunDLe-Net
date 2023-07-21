@@ -4,7 +4,7 @@ import numpy as np
 from functions import *
 
 ### Load Data (and excluding behavioural neurons)
-worm_num = 0
+worm_num = 2
 b_neurons = [
 	'AVAR',
 	'AVAL',
@@ -36,8 +36,9 @@ loss_array = train_model(X_,
 			 model,
 			 optimizer,
 			 gamma=0.9, 
-			 n_epochs=3000,
-			 pca_init=False
+			 n_epochs=2000,
+			 pca_init=False,
+			 best_of_5_init=True
 						 )
 
 # Training losses vs epochs

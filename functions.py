@@ -268,8 +268,7 @@ class BunDLeNet(Model):
         ])
         self.T_Y = tf.keras.Sequential([
             layers.Dense(latent_dim, activation='linear'),
-            layers.Normalization(axis=-1),
-            
+            layers.Normalization(axis=-1),    
         ])
         self.predictor = tf.keras.Sequential([
             layers.Dense(8, activation='linear')
@@ -285,6 +284,7 @@ class BunDLeNet(Model):
         Yt1_lower = Yt_lower + self.T_Y(Yt_lower)
 
         return Yt1_upper, Yt1_lower, Bt1_upper
+
 
 def bccdcc_loss(yt1_upper, yt1_lower, bt1_upper, b_train_1, gamma):
     """Calculate the loss for the BunDLe Net
@@ -331,7 +331,45 @@ class BunDLeTrainer:
         return DCC_loss, behaviour_loss, total_loss
     
 
-def pca_initialisation(X_, tau, latent_dim):
+def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=False, best_of_5_init=False):
+    """
+    Training BunDLe Net
+    
+    Args:
+        X_train: Training input data.
+        B_train_1: Training output data.
+        model: Instance of the BunDLeNet class.
+        optimizer: Optimizer for model training.
+        gamma (float): Weight for the DCC loss component.
+        n_epochs (int): Number of training epochs.
+        pca_initialisation (bool)
+        best_of_5_init (bool)
+    
+    Returns:
+        numpy.ndarray: Array of loss values during training.
+    """
+    train_dataset = tf_batch_prep(X_train, B_train_1)
+    if pca_init:
+        _pca_initialisation(X_train, model.tau, model.latent_dim)
+        model.tau.load_weights('data/generated/tau_pca_weights.h5')
+
+    if best_of_5_init:
+        model = _best_of_5_runs(X_train, B_train_1, model, optimizer, gamma)
+       
+    trainer = BunDLeTrainer(model, optimizer)
+    loss_array = np.zeros((1,3))
+    epochs = tqdm(np.arange(n_epochs))
+    for epoch in epochs:
+        for step, (x_train, b_train_1) in enumerate(train_dataset):
+            DCC_loss, behaviour_loss, total_loss = trainer.train_step(x_train, b_train_1, gamma=gamma)
+            loss_array = np.append(loss_array, [[DCC_loss, behaviour_loss, total_loss]], axis=0)
+        epochs.set_description("Losses %f %f %f" %(DCC_loss.numpy(), behaviour_loss.numpy(), total_loss.numpy()))
+    loss_array = np.delete(loss_array, 0, axis=0)
+    loss_array = loss_array.reshape(n_epochs, int(loss_array.shape[0]//n_epochs), loss_array.shape[-1]).mean(axis=1)
+    return loss_array
+
+
+def _pca_initialisation(X_, tau, latent_dim):
     """
     Initialises BunDLe Net's tau such that its output is the PCA of the input traces.
     PCA initialisation may make the embeddings more reproduceable across runs.
@@ -375,43 +413,43 @@ def pca_initialisation(X_, tau, latent_dim):
     Y0_pred = pcaencoder(X0_).numpy()
     ### Saving weights of this model
     pcaencoder.encoder.save_weights('data/generated/tau_pca_weights.h5')
-    
 
-def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=False):
-    """Training BunDLe Net
-    
-    Args:
-        X_train: Training input data.
-        B_train_1: Training output data.
-        model: Instance of the BunDLeNet class.
-        optimizer: Optimizer for model training.
-        gamma (float): Weight for the DCC loss component.
-        n_epochs (int): Number of training epochs.
-        pca_initialisation (bool)
-    
-    Returns:
-        numpy.ndarray: Array of loss values during training.
+
+def _best_of_5_runs(X_train, B_train_1, model, optimizer, gamma):
     """
-    train_dataset = tf_batch_prep(X_train, B_train_1)
-    if pca_init:
-        pca_initialisation(X_train, model.tau, model.latent_dim)
-        model.tau.load_weights('data/generated/tau_pca_weights.h5')
+    Initialises BunDLe net with the best of 5 runs
 
-    trainer = BunDLeTrainer(model, optimizer)
-    loss_array = np.zeros((1,3))
-    epochs = tqdm(np.arange(n_epochs))
-    for epoch in epochs:
-        for step, (x_train, b_train_1) in enumerate(train_dataset):
-            DCC_loss, behaviour_loss, total_loss = trainer.train_step(x_train, b_train_1, gamma=gamma)
-            loss_array = np.append(loss_array, [[DCC_loss, behaviour_loss, total_loss]], axis=0)
-        epochs.set_description("Losses %f %f %f" %(DCC_loss.numpy(), behaviour_loss.numpy(), total_loss.numpy()))
-    loss_array = np.delete(loss_array, 0, axis=0)
-    loss_array = loss_array.reshape(n_epochs, int(loss_array.shape[0]//n_epochs), loss_array.shape[-1]).mean(axis=1)
-    return loss_array
+    Performs 200 epochs of training for 5 random model initialisations 
+    and picks the model with the lowest loss
+    """
+    model_loss = []
+    for i in range(5):
+        model_ = keras.models.clone_model(model)
+        model_.build(input_shape=X_train.shape)
+        loss_array = train_model(X_train,
+                     B_train_1,
+                     model_,
+                     optimizer,
+                     gamma=gamma, 
+                     n_epochs=200,
+                     pca_init=False,
+                     best_of_5_init=False
+                                 )
+        model_.save_weights('data/generated/best_of_5_runs_models/model_' + str(i))
+        model_loss.append(loss_array[-1,2])
+
+    for n, i in enumerate(model_loss):
+        print('model:', n, 'loss:', i)
+
+    ### Load model with least loss
+    model.load_weights('data/generated/best_of_5_runs_models/model_' + str(np.argmin(model_loss)))
+    return model
+
 
 ####################################################
 #################### Evaluation ####################
 ####################################################
+
 flat_partial = lambda x: x.reshape(x.shape[0],-1)
 
 def r2_single(y_true, y_pred):
@@ -430,6 +468,7 @@ def hits_at_rank(rank, Y_test, Y_pred):
     nbrs = NearestNeighbors(n_neighbors=rank, algorithm='ball_tree').fit(Y_test)
     distances, indices = nbrs.kneighbors(Y_test)
     return np.mean(np.linalg.norm(Y_pred - Y_test, axis=1) < distances[:,-1])
+
 
 ########################################
 ########## Plotting functions ########## 
@@ -458,7 +497,7 @@ def plotting_neuronal_behavioural(X,B, state_names=[], vmin=0, vmax=2):
     plt.show()
 
 
-def plot_phase_space(Y, B, state_names, show_points=True, legend=True, **kwargs):
+def plot_phase_space(Y, B, state_names, show_points=False, legend=True, **kwargs):
     fig = plt.figure(figsize=(8,8))
     ax = plt.axes(projection='3d')
     plot_ps_(fig, ax, Y=Y, B=B, state_names=state_names, show_points=show_points, legend=legend, **kwargs)
@@ -466,7 +505,7 @@ def plot_phase_space(Y, B, state_names, show_points=True, legend=True, **kwargs)
     return fig, ax
 
 
-def plot_ps_(fig, ax, Y, B, state_names, show_points=True, legend=True, colors=None, **kwargs):
+def plot_ps_(fig, ax, Y, B, state_names, show_points=False, legend=True, colors=None, **kwargs):
     if colors is None:
         colors = sns.color_palette('deep', len(state_names))
 
@@ -483,11 +522,11 @@ def plot_ps_(fig, ax, Y, B, state_names, show_points=True, legend=True, colors=N
         ax.legend(handles=legend_elements)
 
     if show_points == True:
-        ax.scatter(Y[:,0], Y[:,1], Y[:,2], c=B, s=1, cmap = ListedColormap(colors))
+        ax.scatter(Y[:,0], Y[:,1], Y[:,2], c='k', s=1, cmap = ListedColormap(colors))
     return fig, ax
 
 
-def rotating_plot(Y, B, state_names, show_points=True, legend=True, filename='rotation.gif', **kwargs):
+def rotating_plot(Y, B, state_names, show_points=False, legend=True, filename='rotation.gif', **kwargs):
     fig = plt.figure(figsize=(8,8))
     ax = plt.axes(projection='3d')
 
