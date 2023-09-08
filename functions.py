@@ -33,6 +33,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 ############## Loading Data #############
 #########################################
 
+
 class Database:
     """
     Loading neuronal and behavioural data from matlab files 
@@ -47,6 +48,8 @@ class Database:
 
     Methods:
         exclude_neurons: Excludes specified neurons from the database.
+        categorise_neurons: Categorises neurons based on whether it is sensory,
+                            inter or motor neuron. 
 
     """
     def __init__(self, data_set_no):
@@ -59,7 +62,6 @@ class Database:
         NeuronNames = data['NeuronNames'][self.data_set_no]
         fps = data['fps'][self.data_set_no]
         States = data['States'][self.data_set_no]
-
 
         self.states = np.sum([n*States[s] for n, s in enumerate(States)], axis = 0).astype(int) # making a single states array in which each number corresponds to a behaviour
         self.state_names = [*States.keys()]
@@ -87,6 +89,33 @@ class Database:
         self.neuron_traces = self.neuron_traces[mask] 
         #self.derivative_traces = self.derivative_traces[mask] 
         self.neuron_names = self.neuron_names[mask]
+
+    def _only_identified_neurons(self):
+        mask = np.logical_not([x.isnumeric() for x in self.neuron_names])
+        self.neuron_traces = self.neuron_traces[mask] 
+        #self.derivative_traces = self.derivative_traces[mask] 
+        self.neuron_names = self.neuron_names[mask]
+
+    def categorise_neurons(self):
+        self._only_identified_neurons()
+        neuron_list = mat73.loadmat('data/raw/Order279.mat')['Order279']
+        neuron_category = mat73.loadmat('data/raw/ClassIDs_279.mat')['ClassIDs_279']
+        category_dict = {neuron: int(category) for neuron, category in zip(neuron_list, neuron_category)}
+
+        mask = np.array([category_dict[neuron] for neuron in self.neuron_names])
+        mask_s = mask == 1
+        mask_i = mask == 2
+        mask_m = mask == 3
+
+        self.neuron_names_s = self.neuron_names[mask_s]
+        self.neuron_names_i = self.neuron_names[mask_i]
+        self.neuron_names_m = self.neuron_names[mask_m]
+
+        self.neuron_traces_s = self.neuron_traces[mask_s]
+        self.neuron_traces_i = self.neuron_traces[mask_i]
+        self.neuron_traces_m = self.neuron_traces[mask_m]
+
+        return mask
 
 flat_partial = lambda x: x.reshape(x.shape[0],-1)
 

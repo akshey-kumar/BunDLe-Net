@@ -4,7 +4,7 @@ import numpy as np
 from functions import *
 
 ### Load Data (and excluding behavioural neurons)
-worm_num = 2
+worm_num = 0
 b_neurons = [
 	'AVAR',
 	'AVAL',
@@ -18,7 +18,6 @@ data = Database(data_set_no=worm_num)
 data.exclude_neurons(b_neurons)
 X = data.neuron_traces.T
 B = data.states
-#state_names = data.state_names
 state_names = ['Dorsal turn', 'Forward', 'No state', 'Reverse-1', 'Reverse-2', 'Sustained reversal', 'Slowing', 'Ventral turn']
 #plotting_neuronal_behavioural(X, B, state_names=state_names)
 
@@ -38,7 +37,7 @@ loss_array = train_model(X_,
 			 gamma=0.9, 
 			 n_epochs=2000,
 			 pca_init=False,
-			 best_of_5_init=True
+			 best_of_5_init=False
 						 )
 
 # Training losses vs epochs

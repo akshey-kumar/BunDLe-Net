@@ -40,7 +40,7 @@ optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=0.001)
 #            pca_init=True)
 
 
-"""
+
 ### figure 1 - bundle net on many worms see new_runs.py
 algorithm = 'BunDLeNet'
 elev = [-45,0,22,-40,-35]
@@ -58,8 +58,8 @@ for worm_num in range(5):
     plot_ps_(fig, ax, Y=Y0_, B=B_, state_names=state_names, show_points=False, legend=True)
     #plt.savefig('figures/figure_1/Y0_' + algorithm + '_worm_' + str(worm_num) + '.pdf', transparent=True)
     plt.show()
-    #rotating_plot(Y=Y0_, B=B_, filename='figures/rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=False, show_points=False)
-"""
+    rotating_plot(Y=Y0_, B=B_, filename='figures/rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=True, show_points=False)
+
 '''
 ### figure 1 - attempt 2 (comparable embeddings)
 algorithm = 'BunDLeNet'
