@@ -3,6 +3,9 @@ sys.path.append(r'../')
 import numpy as np
 from functions import *
 
+import os
+os.chdir('..')
+
 '''
 Layers of the pretrained model on worm_num_i are  
 used in learning a comparable embedding on worm_no_j.

@@ -2,6 +2,8 @@ import sys
 sys.path.append(r'../')
 import numpy as np
 from functions import *
+import os
+os.chdir('..')
 
 ### Load Data (and excluding behavioural neurons)
 worm_num = 0
@@ -18,7 +20,6 @@ data = Database(data_set_no=worm_num)
 data.exclude_neurons(b_neurons)
 X = data.neuron_traces.T
 B = data.states
-#state_names = data.state_names
 state_names = ['Dorsal turn', 'Forward', 'No state', 'Reverse-1', 'Reverse-2', 'Sustained reversal', 'Slowing', 'Ventral turn']
 #plotting_neuronal_behavioural(X, B, state_names=state_names)
 

@@ -1,8 +1,10 @@
 import sys
-sys.path.append(r'../')
+sys.path.append(r'../..')
 import numpy as np
 from functions import *
 
+import os
+os.chdir('../..')
 
 #################################################################
 ##### BunDLe Net --- Architecture and functions for training ####
@@ -58,7 +60,7 @@ class BunDLeNet(Model):
 
         return Yt1_upper, Yt1_lower, Bt1_upper
 
-"""
+
 ### Load Data (and excluding behavioural neurons)
 worm_num = 0
 b_neurons = [
@@ -91,7 +93,7 @@ loss_array = train_model(X_,
              model,
              optimizer,
              gamma=0.9, 
-             n_epochs=2000,
+             n_epochs=1,
              pca_init=False,
              best_of_5_init=False
                          )
@@ -120,6 +122,5 @@ algorithm = 'BunDLeNet'
 
 ### Plotting latent space dynamics
 plot_latent_timeseries(Y0_, B_, state_names)
-
 plot_phase_space(Y0_, B_, state_names = state_names)
-"""
+

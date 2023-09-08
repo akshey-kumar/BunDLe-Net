@@ -1,8 +1,10 @@
 import sys
-sys.path.append(r'../')
+sys.path.append(r'../..')
 import numpy as np
 from functions import *
 
+import os
+os.chdir('../..')
 
 #################################################################
 ##### BunDLe Net --- Architecture and functions for training ####
@@ -174,7 +176,6 @@ Y0m_ = model.tau_m(Xm_[:,0])
 Y0_ = model.post_tau([Y0s_, Y0i_, Y0m_]).numpy() 
 
 model.post_tau.get_weights()
-
 
 algorithm = 'BunDLeNet'
 # Save the weights

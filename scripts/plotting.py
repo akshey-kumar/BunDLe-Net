@@ -4,6 +4,19 @@ import numpy as np
 from functions import *
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
+import os
+os.chdir('..')
+
+"""
+
+This script was used for plotting all the figures
+in the jounral paper for BunDLe-Net. Some of the 
+data was already produced in other python scripts 
+can be found in the main repo unless otherwise 
+indicated. To reproduce a figure, uncomment the 
+section of code for the corresponding figure.
+
+"""
 
 ### Load Data (and excluding behavioural neurons)
 worm_num = 0
@@ -41,7 +54,7 @@ optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=0.001)
 
 
 
-### figure 1 - bundle net on many worms see new_runs.py
+### figure 1 - bundle net on many worms (see scripts/embedding_worms_separately.py)
 algorithm = 'BunDLeNet'
 elev = [-45,0,22,-40,-35]
 azim = [162,8,-105,65,101]
@@ -61,7 +74,7 @@ for worm_num in range(5):
     rotating_plot(Y=Y0_, B=B_, filename='figures/rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=True, show_points=False)
 
 '''
-### figure 1 - attempt 2 (comparable embeddings)
+### figure 1 - attempt 2 (see scripts/comparable_embeddings.py)
 algorithm = 'BunDLeNet'
 elev = -161
 azim = 61
@@ -158,7 +171,7 @@ plt.show()
 
 
 
-### figure 6 - Learning process - see BunDLe-Net/learning_process.py
+### figure 6 - Learning process - see BunDLe-Net/scripts/learning_process.py
 epochs = 1000
 delta_epochs = 50
 for i in range(delta_epochs,epochs,delta_epochs):

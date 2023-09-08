@@ -5,6 +5,10 @@ from functions import *
 
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
+import os
+
+os.chdir('..')
+
 ### Load Data (and excluding behavioural neurons)
 worm_num = 0
 b_neurons = [
@@ -16,6 +20,7 @@ b_neurons = [
 	'SMDDL',
 	'RIBR',
 	'RIBL',]
+
 data = Database(data_set_no=worm_num)
 data.exclude_neurons(b_neurons)
 X = data.neuron_traces.T
@@ -37,16 +42,17 @@ model = BunDLeNet(latent_dim=3)
 #             ])
 model.build(input_shape=X_.shape)
 optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=0.001)
+
 # Uncomment only if you want to train your model from scratch
-# loss_array = train_model(X_,
-# 			 B_,
-# 			 model,
-# 			 optimizer,
-# 			 gamma=0.9, 
-# 			 n_epochs=2000,
-# 			 pca_init=True,
-# 			 			 )
-# model.save_weights('data/generated/time_evolution_model')
+loss_array = train_model(X_,
+			 B_,
+			 model,
+			 optimizer,
+			 gamma=0.9, 
+			 n_epochs=2000,
+			 pca_init=True,
+			 			 )
+model.save_weights('data/generated/time_evolution_model')
 
 ### Dynamics model (implicit in the BunDLe Net)
 model.load_weights('data/generated/time_evolution_model')
@@ -77,7 +83,6 @@ for i in np.arange(0,Y0_.shape[0], 1000):
 ax.set_axis_off()  
 plt.legend(handles=[true_y_line[0], predicted_y_line[0]])
 plt.show()
-
 
 plot_phase_space(Y0_, B_, state_names)
 
