@@ -6,7 +6,8 @@ from functions import *
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 
-
+import os
+os.chdir('..')
 
 algorithm = 'BunDLeNet'
 worm_num = 0
@@ -74,6 +75,4 @@ plt.plot(history.history['val_mse'])
 Y_out_pred = model(Y_in_test).numpy()
 mse_2 = mean_squared_error(flat_partial(Y_out_pred), flat_partial(Y_out_test))
 print(mse_1, mse_2)
-
-exit()
 

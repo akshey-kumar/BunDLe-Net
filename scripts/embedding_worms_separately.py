@@ -3,8 +3,11 @@ sys.path.append(r'../')
 import numpy as np
 from functions import *
 
+import os
+os.chdir('..')
+
 ### Load Data (and excluding behavioural neurons)
-for worm_num in [2,3]:
+for worm_num in range(5):
     b_neurons = [
         'AVAR',
         'AVAL',
