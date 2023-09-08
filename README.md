@@ -3,5 +3,5 @@ Behavioural and Dynamic Learning Network (BunDLe Net) is an algorithm to learn m
 
 After creating a new virtual environment, to install dependencies, you can run
 ```bash
-python3 -m pip install requirements.txt
+python3 -m pip install -r requirements.txt
 ```
