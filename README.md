@@ -10,4 +10,6 @@ For the journal article on BunDLe-Net, see [https://www.biorxiv.org/content/10.1
 For a demonstration of BunDLe-Net, please refer to the `main.py` file or explore the `notebooks/` directory for a Jupyter Notebook demo. You'll find all the heavy-lifting and the algorithm itself in the `functions/` directory.
 
 
+**BunDLe-Net embedding of C.elegans neuronal data in 3-D latent space**
+
 ![BunDLe-Net embedding of C.elegans neuronal data in 3-D latent space](https://github.com/akshey-kumar/BunDLe-Net/blob/main/figures/rotation_comparable_embeddings/rotation_BunDLeNet_worm_0.gif)
