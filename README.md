@@ -7,4 +7,4 @@ python3 -m pip install -r requirements.txt
 ```
 For the journal article on BunDLe-Net, see [https://www.biorxiv.org/content/10.1101/2023.08.08.551978v2](https://www.biorxiv.org/content/10.1101/2023.08.08.551978v2)
 
-For a demo of the BunDLe-Net, please see main.py or looks in notebooks/ for a jupyter notebook demo. All the heavy-lifting and the algorithm itself can be found in functions/.
+For a demonstration of BunDLe-Net, please refer to the `main.py` file or explore the `notebooks/` directory for a Jupyter Notebook demo. You'll find all the heavy-lifting and the algorithm itself in the `functions/` directory.
