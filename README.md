@@ -6,3 +6,5 @@ After creating a new virtual environment, to install dependencies, you can run
 python3 -m pip install -r requirements.txt
 ```
 For the journal article on BunDLe-Net, see [https://www.biorxiv.org/content/10.1101/2023.08.08.551978v2](https://www.biorxiv.org/content/10.1101/2023.08.08.551978v2)
+
+For a demo of the BunDLe-Net, please see main.py or looks in notebooks/ for a jupyter notebook demo. All the heavy-lifting and the algorithm itself can be found in functions/.
