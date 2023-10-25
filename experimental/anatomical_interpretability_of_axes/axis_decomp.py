@@ -119,7 +119,8 @@ def rotating_plot(Y, B, state_names, show_points=False, legend=True, filename='r
 #from axis_decomp import *
 
 ### Load Data (and excluding behavioural neurons)
-worm_num = 1
+worm_num = 3
+
 b_neurons = [
     'AVAR',
     'AVAL',
@@ -162,13 +163,14 @@ loss_array = train_model((Xs_, Xi_, Xm_),
                          )
 
 # Training losses vs epochs
+'''
 plt.figure()
 for i, label in enumerate(["$\mathcal{L}_{{Markov}}$", "$\mathcal{L}_{{Behavior}}$","Total loss $\mathcal{L}$" ]):
     plt.semilogy(loss_array[:,i], label=label)
 
 plt.legend()
 plt.show()
-
+'''
 ### Projecting into latent space
 Y0s_ = model.tau_s(Xs_[:,0])
 Y0i_ = model.tau_i(Xi_[:,0])
@@ -187,8 +189,7 @@ algorithm = 'BunDLeNet'
 
 
 ### Plotting latent space dynamics
-plot_latent_timeseries(Y0_, B_, state_names)
-
-plot_phase_space(Y0_, B_, state_names = state_names)
-rotating_plot(Y0_, B_,filename='figures/rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=False)
+#plot_latent_timeseries(Y0_, B_, state_names)
+#plot_phase_space(Y0_, B_, state_names = state_names)
+rotating_plot(Y0_, B_,filename='figures/rotation_axis_decomp/rotation'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=False)
 

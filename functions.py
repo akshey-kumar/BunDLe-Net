@@ -70,6 +70,10 @@ class Database:
         self.neuron_names = np.array(NeuronNames, dtype=object)
         self.fps = fps
 
+        ### To handle bug in dataset 3 where in neuron_names the last entry is a list. we replace the list with the contents of the list
+        self.neuron_names = np.array([x if not isinstance(x, list) else x[0] for x in self.neuron_names])
+
+
     def exclude_neurons(self, exclude_neurons):
         """
         Excludes specified neurons from the database.
