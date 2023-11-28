@@ -10,7 +10,8 @@ __pycache__/
 .DS_Store
 
 # Data generated
-data/generated
+data/generated/
+data/raw/fish_cilia/
 
 # Distribution / packaging
 .Python
