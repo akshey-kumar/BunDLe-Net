@@ -53,6 +53,7 @@ class BunDLeNet(Model):
         # Upper arm of commutativity diagram
         Yt1_upper = self.tau(X[:,1])
         Bt1_upper = self.predictor(Yt1_upper) 
+        
 
         # Lower arm of commutativity diagram
         Yt_lower = self.tau(X[:,0])
@@ -102,6 +103,45 @@ class BunDLeTrainer:
         self.optimizer.apply_gradients(zip(grads, self.model.trainable_weights))
         return DCC_loss, behaviour_loss, total_loss
     
+
+def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=False, best_of_5_init=False):
+    """Training BunDLe Net
+    
+    Args:
+        X_train: Training input data.
+        B_train_1: Training output data.
+        model: Instance of the BunDLeNet class.
+        optimizer: Optimizer for model training.
+        gamma (float): Weight for the DCC loss component.
+        n_epochs (int): Number of training epochs.
+        pca_initialisation (bool)
+    
+    Returns:
+        numpy.ndarray: Array of loss values during training.
+    """
+    train_dataset = tf_batch_prep(X_train, B_train_1)
+    
+    if pca_init:
+        pca_initialisation(X_train, model.tau, model.latent_dim)
+        model.tau.load_weights('data/generated/tau_pca_weights.h5')
+
+    if best_of_5_init:
+        model = _best_of_5_runs(X_train, B_train_1, model, optimizer, gamma)
+           
+    
+    trainer = BunDLeTrainer(model, optimizer)
+    loss_array = np.zeros((1,3))
+    epochs = tqdm(np.arange(n_epochs))
+    for epoch in epochs:
+        for step, (x_train, b_train_1) in enumerate(train_dataset):
+            DCC_loss, behaviour_loss, total_loss = trainer.train_step(x_train, b_train_1, gamma=gamma)
+            loss_array = np.append(loss_array, [[DCC_loss, behaviour_loss, total_loss]], axis=0)
+        epochs.set_description("Losses %f %f %f" %(DCC_loss.numpy(), behaviour_loss.numpy(), total_loss.numpy()))
+    loss_array = np.delete(loss_array, 0, axis=0)
+    loss_array = loss_array.reshape(n_epochs, int(loss_array.shape[0]//n_epochs), loss_array.shape[-1]).mean(axis=1)
+    return loss_array
+
+
 
 def pca_initialisation(X_, tau, latent_dim):
     """
@@ -179,39 +219,3 @@ def _best_of_5_runs(X_train, B_train_1, model, optimizer, gamma):
     model.load_weights('data/generated/best_of_5_runs_models/model_' + str(np.argmin(model_loss)))
     return model
 
-def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=False, best_of_5_init=False):
-    """Training BunDLe Net
-    
-    Args:
-        X_train: Training input data.
-        B_train_1: Training output data.
-        model: Instance of the BunDLeNet class.
-        optimizer: Optimizer for model training.
-        gamma (float): Weight for the DCC loss component.
-        n_epochs (int): Number of training epochs.
-        pca_initialisation (bool)
-    
-    Returns:
-        numpy.ndarray: Array of loss values during training.
-    """
-    train_dataset = tf_batch_prep(X_train, B_train_1)
-    
-    if pca_init:
-        pca_initialisation(X_train, model.tau, model.latent_dim)
-        model.tau.load_weights('data/generated/tau_pca_weights.h5')
-
-    if best_of_5_init:
-        model = _best_of_5_runs(X_train, B_train_1, model, optimizer, gamma)
-           
-    
-    trainer = BunDLeTrainer(model, optimizer)
-    loss_array = np.zeros((1,3))
-    epochs = tqdm(np.arange(n_epochs))
-    for epoch in epochs:
-        for step, (x_train, b_train_1) in enumerate(train_dataset):
-            DCC_loss, behaviour_loss, total_loss = trainer.train_step(x_train, b_train_1, gamma=gamma)
-            loss_array = np.append(loss_array, [[DCC_loss, behaviour_loss, total_loss]], axis=0)
-        epochs.set_description("Losses %f %f %f" %(DCC_loss.numpy(), behaviour_loss.numpy(), total_loss.numpy()))
-    loss_array = np.delete(loss_array, 0, axis=0)
-    loss_array = loss_array.reshape(n_epochs, int(loss_array.shape[0]//n_epochs), loss_array.shape[-1]).mean(axis=1)
-    return loss_array

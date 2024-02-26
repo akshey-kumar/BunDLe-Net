@@ -11,11 +11,11 @@ from matplotlib.colors import ListedColormap
 def plot_phase_space(Y, B, state_names, show_points=True, legend=True, **kwargs):
     fig = plt.figure(figsize=(8,8))
     ax = plt.axes(projection='3d')
-    plot_ps_(fig, ax, Y=Y, B=B, state_names=state_names, show_points=show_points, legend=legend, **kwargs)
+    plot_ps_discrete_(fig, ax, Y=Y, B=B, state_names=state_names, show_points=show_points, legend=legend, **kwargs)
     plt.show()
     return fig, ax
 
-def plot_ps_(fig, ax, Y, B, state_names, show_points=True, legend=True, colors=None, **kwargs):
+def plot_ps_discrete_(fig, ax, Y, B, state_names, show_points=True, legend=True, colors=None, **kwargs):
     if Y.shape[1] == 3:
         points = np.array(Y.T).T.reshape(-1, 1, 3)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
@@ -40,4 +40,36 @@ def plot_ps_(fig, ax, Y, B, state_names, show_points=True, legend=True, colors=N
         cbar.ax.set_yticklabels(state_names)
     if show_points == True:
         ax.scatter(Y[:,0], Y[:,1], Y[:,2], c=B, s=1, cmap = ListedColormap(colors))
+    return fig, ax
+
+
+def plot_ps_continuous_(fig, ax, Y, B, cmap='viridis'):
+    
+    def color_transform(a, cmap=cmap):
+        normalized_value = (a - B.min()) / (B.max() - B.min())
+        cmap = plt.get_cmap(cmap)
+        rgba_color = cmap(normalized_value)
+        rgb_color = rgba_color[:3]
+
+        return rgb_color
+    
+    for i in range(len(Y) - 1):
+        d = (Y[i+1] - Y[i])
+        ax.quiver(Y[i, 0], Y[i, 1], Y[i, 2],
+                  d[0], d[1], d[2],
+                  color=color_transform(B[i]), arrow_length_ratio=0.1/np.linalg.norm(d), linewidths=1)
+    ax.set_axis_off()  
+
+    x = ax.scatter(Y[:, 0], Y[:, 1], Y[:, 2],
+                   c=B,
+                   cmap=cmap,
+                   s=4)
+    return fig, ax
+
+def plot_phase_space_continuous(Y, B, cmap='viridis', **kwargs):
+    fig = plt.figure(figsize=(8,8))
+    ax = plt.axes(projection='3d')
+    ax.view_init(**kwargs)
+    plot_ps_(fig, ax, Y, B, cmap)
+    plt.show()
     return fig, ax
