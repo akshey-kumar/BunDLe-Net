@@ -81,6 +81,7 @@ def bccdcc_loss(yt1_upper, yt1_lower, bt1_upper, b_train_1, gamma):
     total_loss = gamma*DCC_loss + (1-gamma)*behaviour_loss
     return gamma*DCC_loss, (1-gamma)*behaviour_loss, total_loss
 
+
 class BunDLeTrainer:
     """Trainer for the BunDLe Net model.
     
@@ -89,27 +90,80 @@ class BunDLeTrainer:
     Args:
         model: Instance of the BunDLeNet class.
         optimizer: Optimizer for model training.
+        gamma: Hyper-parameter of BunDLe-Net loss function
     """
-    def __init__(self, model, optimizer):
+    def __init__(self, model, optimizer, gamma):
         self.model = model
         self.optimizer = optimizer
+        self.gamma = gamma
     
     @tf.function
-    def train_step(self, x_train, b_train_1, gamma):
+    def train_step(self, x_train, b_train_1):
         with tf.GradientTape() as tape:
+            # forward pass
             yt1_upper, yt1_lower, bt1_upper = self.model(x_train, training=True)
-            DCC_loss, behaviour_loss, total_loss = bccdcc_loss(yt1_upper, yt1_lower, bt1_upper, b_train_1, gamma)
+            # loss calculation
+            DCC_loss, behaviour_loss, total_loss = bccdcc_loss(yt1_upper, yt1_lower, bt1_upper, b_train_1, self.gamma)
+
+        # gradient calculation
         grads = tape.gradient(total_loss, self.model.trainable_weights)
+        # weights update
         self.optimizer.apply_gradients(zip(grads, self.model.trainable_weights))
+        
         return DCC_loss, behaviour_loss, total_loss
     
 
+<<<<<<< Updated upstream
 def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=False, best_of_5_init=False):
+=======
+    @tf.function
+    def test_step(self, x_test, b_test_1):
+        # forward pass
+        yt1_upper, yt1_lower, bt1_upper = self.model(x_test, training=False)
+        # loss calculation
+        DCC_loss, behaviour_loss, total_loss = bccdcc_loss(yt1_upper, yt1_lower, bt1_upper, b_test_1, self.gamma)
+        
+        return DCC_loss, behaviour_loss, total_loss
+
+
+    def train_loop(self, train_dataset):
+        '''
+        Handles the training within a single epoch and logs losses
+        '''
+        loss_array = np.zeros((0,3))
+        for batch, (x_train, b_train_1) in enumerate(train_dataset):
+            DCC_loss, behaviour_loss, total_loss = self.train_step(x_train, b_train_1)
+            loss_array = np.append(loss_array, [[DCC_loss, behaviour_loss, total_loss]], axis=0)
+            
+        avg_train_loss = loss_array.mean(axis=0)
+
+        return avg_train_loss
+ 
+    def test_loop(self, test_dataset):
+        '''
+        Handles testing within a single epoch and logs losses
+        '''
+        loss_array = np.zeros((0,3))
+        for batch, (x_test, b_test_1) in enumerate(test_dataset):
+            DCC_loss, behaviour_loss, total_loss = self.test_step(x_test, b_test_1)
+            loss_array = np.append(loss_array, [[DCC_loss, behaviour_loss, total_loss]], axis=0)
+            
+        avg_test_loss = loss_array.mean(axis=0)
+
+        return avg_test_loss
+
+def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=False, best_of_5_init=False, validation_data = None):
+>>>>>>> Stashed changes
     """Training BunDLe Net
     
     Args:
         X_train: Training input data.
         B_train_1: Training output data.
+<<<<<<< Updated upstream
+=======
+        X_test: Testing input data.
+        B_test_1: Testing output data.
+>>>>>>> Stashed changes
         model: Instance of the BunDLeNet class.
         optimizer: Optimizer for model training.
         gamma (float): Weight for the DCC loss component.
@@ -121,12 +175,20 @@ def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=
     """
     train_dataset = tf_batch_prep(X_train, B_train_1)
     
+<<<<<<< Updated upstream
+=======
+    if validation_data is not None:
+        X_test, B_test_1 = validation_data
+        test_dataset = tf_batch_prep(X_test, B_test_1)
+        
+>>>>>>> Stashed changes
     if pca_init:
         pca_initialisation(X_train, model.tau, model.latent_dim)
         model.tau.load_weights('data/generated/tau_pca_weights.h5')
 
     if best_of_5_init:
         model = _best_of_5_runs(X_train, B_train_1, model, optimizer, gamma)
+<<<<<<< Updated upstream
            
     
     trainer = BunDLeTrainer(model, optimizer)
@@ -141,6 +203,28 @@ def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=
     loss_array = loss_array.reshape(n_epochs, int(loss_array.shape[0]//n_epochs), loss_array.shape[-1]).mean(axis=1)
     return loss_array
 
+=======
+    
+    trainer = BunDLeTrainer(model, optimizer, gamma)
+    epochs = tqdm(np.arange(n_epochs))
+    train_history = []
+    test_history = [] if validation_data is not None else None
+
+    for epoch in epochs:
+        train_loss = trainer.train_loop(train_dataset)
+        train_history.append(train_loss)
+        
+        if validation_data is not None:
+            test_loss = trainer.test_loop(test_dataset)
+            test_history.append(test_loss)
+
+        epochs.set_description("Losses [Markov, Behaviour, Total]: " + str(train_loss))
+
+    train_history = np.array(train_history)
+    test_history = np.array(test_history) if test_history is not None else None
+
+    return train_history, test_history
+>>>>>>> Stashed changes
 
 
 def pca_initialisation(X_, tau, latent_dim):
@@ -219,3 +303,7 @@ def _best_of_5_runs(X_train, B_train_1, model, optimizer, gamma):
     model.load_weights('data/generated/best_of_5_runs_models/model_' + str(np.argmin(model_loss)))
     return model
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes

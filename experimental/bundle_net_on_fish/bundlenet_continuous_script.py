@@ -45,20 +45,21 @@ if __name__ == '__main__':
 	optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=0.001)
 
 	#X_train, X_test, B_train, B_test = timeseries_train_test_split(X_, B_)
-	loss_array = train_model(X_,
-				 B_, 
-				 model,
-				 optimizer, 
-				 gamma=0.9, 
-				 n_epochs=200,
-				 pca_init=False
-							 )
+	train_history = train_model(
+	    X_,
+	    B_,
+	    model,
+	    optimizer,
+	    gamma=0.9, 
+	    n_epochs=200,
+	    pca_init=False
+    )
 
 	# Training losses vs epochs
 	plt.figure()
 
 	for i, label in  enumerate(["$\mathcal{L}_{{Markov}}$", "$\mathcal{L}_{{Behavior}}$","Total loss $\mathcal{L}$" ]):
-		plt.plot(loss_array[:,i], label=label)
+		plt.plot(train_history[:,i], label=label)
 	plt.legend()
 	plt.show()
 
