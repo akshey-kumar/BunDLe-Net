@@ -191,7 +191,7 @@ def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=
             test_loss = trainer.test_loop(test_dataset)
             test_history.append(test_loss)
 
-        epochs.set_description("Losses [Markov, Behaviour, Total]: " + str(train_loss))
+        epochs.set_description("Loss [Markov, Behaviour, Total]: " + str(np.round(train_loss,4)))
 
     train_history = np.array(train_history)
     test_history = np.array(test_history) if test_history is not None else None
