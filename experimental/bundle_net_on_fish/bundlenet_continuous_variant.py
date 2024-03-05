@@ -148,7 +148,7 @@ class BunDLeTrainer:
 
         return avg_test_loss
 
-def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=False, best_of_5_init=False, validation_data = None):
+def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=False, best_of_5_init=False, best_of_n_init=False, validation_data = None):
     """Training BunDLe Net
     
     Args:
@@ -176,7 +176,8 @@ def train_model(X_train, B_train_1, model, optimizer, gamma, n_epochs, pca_init=
         model.tau.load_weights('data/generated/tau_pca_weights.h5')
 
     if best_of_5_init:
-        model = _best_of_5_runs(X_train, B_train_1, model, optimizer, gamma)
+        model = _best_of_5_runs(X_train, B_train_1, model, optimizer, gamma, validation_data)
+
     
     trainer = BunDLeTrainer(model, optimizer, gamma)
     epochs = tqdm(np.arange(n_epochs))
@@ -244,34 +245,41 @@ def pca_initialisation(X_, tau, latent_dim):
     ### Saving weights of this model
     pcaencoder.encoder.save_weights('data/generated/tau_pca_weights.h5')
 
-    
-def _best_of_5_runs(X_train, B_train_1, model, optimizer, gamma):
+
+
+def _best_of_5_runs(X_train, B_train_1, model, optimizer, gamma, validation_data):
     """
     Initialises BunDLe net with the best of 5 runs
 
     Performs 200 epochs of training for 5 random model initialisations 
     and picks the model with the lowest loss
     """
+    if validation_data is None:
+        import warnings
+        warnings.warn("No validation data given. Will proceed to use train dataset loss as deciding factor for the best model")
+        validation_data = (X_train, B_train_1)
+
     model_loss = []
     for i in range(5):
         model_ = keras.models.clone_model(model)
         model_.build(input_shape=X_train.shape)
-        loss_array = train_model(X_train,
-                     B_train_1,
-                     model_,
-                     optimizer,
-                     gamma=gamma, 
-                     n_epochs=20,
-                     pca_init=False,
-                     best_of_5_init=False
-                                 )
+        train_history, test_history = train_model(
+            X_train,
+            B_train_1,
+            model_,
+            optimizer,
+            gamma=gamma, 
+            n_epochs=100,
+            pca_init=False,
+            best_of_5_init=False,
+            validation_data=validation_data
+        )
         model_.save_weights('data/generated/best_of_5_runs_models/model_' + str(i))
-        model_loss.append(loss_array[-1,2])
+        model_loss.append(test_history[-1,-1])
 
     for n, i in enumerate(model_loss):
-        print('model:', n, 'loss:', i)
+        print('model:', n, 'val loss:', i)
 
     ### Load model with least loss
     model.load_weights('data/generated/best_of_5_runs_models/model_' + str(np.argmin(model_loss)))
     return model
-
