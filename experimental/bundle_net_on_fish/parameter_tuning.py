@@ -15,7 +15,7 @@ from ray.tune.search.hyperopt import HyperOptSearch
 import os
 
 
-fish_data_id = '220119_F2_F2_run11' #220119_F2_F2_run11, 220127_F4_F4_run2
+fish_data_id = '220127_F4_F4_run2' #220119_F2_F2_run11, 220127_F4_F4_run2
 path_neuronal_data ='../../data/raw/fish_cilia/traces_with_vigour_directionality_behaviours/' + fish_data_id +'_cells_spike_rate_signals.npy' 
 path_behaviour_data1 ='../../data/raw/fish_cilia/traces_with_vigour_directionality_behaviours/' + fish_data_id +'_directionality.npy'
 path_behaviour_data2 ='../../data/raw/fish_cilia/traces_with_vigour_directionality_behaviours/' + fish_data_id +'_vigour.npy'
@@ -37,8 +37,9 @@ X = StandardScaler(with_mean=False).fit_transform(X)
 # Set the parameters to be tuned here
 latent_dim=3
 search_space = {
-    "win": tune.grid_search([1,2,3,4,5,6,7,8,9,10]),
-    "T_Y_option": tune.grid_search(['linear', 'non-linear'])
+    "win": tune.grid_search([2]),
+    "T_Y_option": tune.grid_search(['linear']),
+    'gamma': tune.grid_search([0, 0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9, 1])
 } 
 
 
@@ -74,7 +75,7 @@ def objective(config):
             B_train_1,
             model,
             optimizer,
-            gamma=0.9, 
+            gamma=config['gamma'], 
             n_epochs=200,
             pca_init=False,
             best_of_5_init=False,
