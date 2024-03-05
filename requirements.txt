@@ -6,3 +6,4 @@ matplotlib
 tensorflow
 scikit-learn
 seaborn
+ray[data,train,tune,serve]
