@@ -35,11 +35,11 @@ B = StandardScaler(with_mean=False).fit_transform(B)
 X = StandardScaler(with_mean=False).fit_transform(X)
 
 # Set the parameters to be tuned here
-latent_dim=3
 search_space = {
     "win": tune.grid_search([2]),
-    "T_Y_option": tune.grid_search(['linear']),
-    'gamma': tune.grid_search([0, 0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9, 1])
+    "T_Y_option": tune.grid_search(['linear', 'non-linear']),
+    'gamma': tune.grid_search([0.9]),
+    'latent_dim': tune.grid_search([2,3,4,5,6,7,8,9,10])
 } 
 
 
@@ -54,18 +54,18 @@ def objective(config):
     for i in range(5):
         T_Y_options  = {
             'linear': tf.keras.Sequential([
-                layers.Dense(latent_dim, activation='linear'),
+                layers.Dense(config['latent_dim'], activation='linear'),
                 layers.Normalization(axis=-1),
             ]),
             'non-linear': tf.keras.Sequential([
-                layers.Dense(latent_dim, activation='relu'),
-                layers.Dense(2*latent_dim, activation='relu'),
-                layers.Dense(latent_dim, activation='linear'),
+                layers.Dense(config['latent_dim'], activation='relu'),
+                layers.Dense(2*config['latent_dim'], activation='relu'),
+                layers.Dense(config['latent_dim'], activation='linear'),
                 layers.Normalization(axis=-1),
             ])
         }
         ### Deploy BunDLe Net
-        model = BunDLeNet(latent_dim=3, num_behaviour=B_.shape[1])
+        model = BunDLeNet(latent_dim=config['latent_dim'], num_behaviour=B_.shape[1])
         model.build(input_shape=X_.shape)
         optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=0.001)
         model.T_Y = T_Y_options[config["T_Y_option"]]
