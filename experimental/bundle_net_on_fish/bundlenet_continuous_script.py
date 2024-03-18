@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 import tensorflow as tf
 from bundlenet_continuous_variant import BunDLeNet, train_model
-from functions import preprocess_data, prep_data, plotting_neuronal_behavioural, plot_latent_timeseries
+from .functions import preprocess_data, prep_data, plotting_neuronal_behavioural, plot_latent_timeseries
 
 
 import os

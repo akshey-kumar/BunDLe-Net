@@ -10,7 +10,7 @@ from tensorflow import keras
 from tensorflow.keras.losses import Loss
 from tensorflow.keras.models import Model
 from tensorflow.keras import layers, losses
-from functions import tf_batch_prep
+from .functions import tf_batch_prep
 
 ################################################################################
 ##### BunDLe Net --- Architecture and functions for training - continuous B ####

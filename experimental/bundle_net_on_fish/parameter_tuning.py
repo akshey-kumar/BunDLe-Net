@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow.keras import layers, losses
 from sklearn.preprocessing import RobustScaler, StandardScaler, MinMaxScaler
-from bundlenet_continuous_variant import BunDLeNet, train_model
-from functions import preprocess_data, prep_data, plotting_neuronal_behavioural, plot_latent_timeseries, timeseries_train_test_split
-from plotting_functions import plot_phase_space
+from utils.bundlenet_continuous_variant import BunDLeNet, train_model
+from utils.functions import preprocess_data, prep_data, timeseries_train_test_split
+from utils.plotting_functions import plot_phase_space
 from ray import tune, train
 from ray.tune.search.hyperopt import HyperOptSearch
 
