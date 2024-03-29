@@ -12,6 +12,7 @@ __pycache__/
 # Data generated
 data/generated/
 data/raw/fish_cilia/
+data/raw/stimuli_data_jalaja
 
 # Distribution / packaging
 .Python
