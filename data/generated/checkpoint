@@ -1,2 +1,2 @@
-model_checkpoint_path: "time_evolution_model"
-all_model_checkpoint_paths: "time_evolution_model"
+model_checkpoint_path: "BunDLeNet_model_worm_6"
+all_model_checkpoint_paths: "BunDLeNet_model_worm_6"

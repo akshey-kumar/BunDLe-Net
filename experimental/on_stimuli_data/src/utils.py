@@ -201,7 +201,7 @@ def hits_at_rank(rank, Y_test, Y_pred):
 ########################################
 ########## Plotting functions ########## 
 ########################################
-
+"""
 def plotting_neuronal_behavioural(X,B, state_names=[], vmin=0, vmax=2):
     fig, axs = plt.subplots(2,1,figsize=(10,4))
     im0 = axs[0].imshow(X.T,aspect='auto', vmin=vmin,vmax=vmax, interpolation='None')
@@ -223,12 +223,46 @@ def plotting_neuronal_behavioural(X,B, state_names=[], vmin=0, vmax=2):
     axs[1].set_ylabel("Behaviour")
     axs[1].set_yticks([])
     plt.show()
+"""
 
+def plotting_neuronal_behavioural(X, B, B_names, S, S_names, R, R_names,**kwargs):
+    fig, axs = plt.subplots(4,1,figsize=(12,8))
+    im0 = axs[0].imshow(X.T,aspect='auto', interpolation='None',**kwargs)
+    # tell the colorbar to tick at integers
+    cax0 = plt.colorbar(im0)
+    axs[0].set_xlabel("time $t$")
+    axs[0].set_ylabel("Neuronal activation")
+    
+    def discrete_plot(ax, B, B_names, y_label, cmap):
+        colors = sns.color_palette(cmap, len(B_names))
+        cmap = plt.get_cmap(cm.colors.ListedColormap(colors), np.max(B) - np.min(B) + 1)
+        im1 = ax.imshow([B], cmap=cmap, vmin=np.min(B) - 0.5, vmax=np.max(B) + 0.5, aspect='auto')
+        cax = plt.colorbar(im1, ticks=np.unique(B))
+        if B_names:
+            cax.ax.set_yticklabels(list(B_names.values()))
+        ax.set_xlabel("time $t$")
+        ax.set_ylabel(y_label)
+        ax.set_yticks([])
+    
+    discrete_plot(axs[1], B, B_names, y_label="Behaviour", cmap = 'Pastel1')
+    discrete_plot(axs[2], S, S_names, y_label="Stimulus", cmap = 'Set2')
+    discrete_plot(axs[3], R, R_names, y_label="Response", cmap = 'Set3')
 
+    plt.show()
+
+def plot_phase_space_discrete(Y, B, cmap='viridis', **kwargs):
+    fig = plt.figure(figsize=(8,8))
+    ax = plt.axes(projection='3d')
+    ax.view_init(**kwargs)
+    plot_ps_(fig, ax, Y, B, cmap)
+    plt.show()
+    return fig, ax
+    
 def plot_phase_space(Y, B, state_names, show_points=False, legend=True, **kwargs):
     fig = plt.figure(figsize=(8,8))
     ax = plt.axes(projection='3d')
-    plot_ps_(fig, ax, Y=Y, B=B, state_names=state_names, show_points=show_points, legend=legend, **kwargs)
+    ax.view_init(**kwargs)
+    plot_ps_(fig, ax, Y=Y, B=B, state_names=state_names, show_points=show_points, legend=legend)
     plt.show()
     return fig, ax
 
