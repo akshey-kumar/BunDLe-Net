@@ -5,8 +5,10 @@ Create a virtual environment with Python 3.10.13. You can check your Python vers
 
 ```bash
 python3 --version
+```
 
 After creating a new virtual environment, to install dependencies, you can run
+
 ```bash
 python3 -m pip install -r requirements.txt
 ```
