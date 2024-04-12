@@ -152,7 +152,6 @@ tensorboard-data-server==0.7.1
 tensorboardX==2.6.2.2
 tensorflow==2.13.0rc2
 tensorflow-estimator==2.13.0
-tensorflow-macos==2.13.0rc2
 termcolor==2.3.0
 terminado==0.18.1
 threadpoolctl==3.1.0

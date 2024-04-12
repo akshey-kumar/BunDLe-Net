@@ -1,10 +1,24 @@
 # BunDLe-Net
 Behavioural and Dynamic Learning Network (BunDLe Net) is an algorithm to learn meaningful coarse-grained representations from time-series data. It maps high-dimensional data to low-dimensional space while preserving both dynamical and behavioural information. It has been applied, but is not limited, to neuronal manifold learning. 
 
+Create a virtual environment with Python 3.10.13. You can check your Python version by running:
+
+```bash
+python3 --version
+```
+
 After creating a new virtual environment, to install dependencies, you can run
+
 ```bash
 python3 -m pip install -r requirements.txt
 ```
+
+Windows users may additionally require,
+```bash
+python3 -m pip install imageio
+python3 -m pip install xarray
+```
+
 For the journal article on BunDLe-Net, see [https://www.biorxiv.org/content/10.1101/2023.08.08.551978v2](https://www.biorxiv.org/content/10.1101/2023.08.08.551978v2)
 
 For a demonstration of BunDLe-Net, please refer to the `main.py` file or explore the `notebooks/` directory for a Jupyter Notebook demo. You'll find all the heavy-lifting and the algorithm itself in the `functions/` directory.
