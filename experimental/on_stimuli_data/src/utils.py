@@ -263,11 +263,13 @@ def plot_phase_space(Y, B, state_names, show_points=False, legend=True, **kwargs
     ax = plt.axes(projection='3d')
     ax.view_init(**kwargs)
     plot_ps_(fig, ax, Y=Y, B=B, state_names=state_names, show_points=show_points, legend=legend)
-    plt.show()
     return fig, ax
 
 
 def plot_ps_(fig, ax, Y, B, state_names, show_points=False, legend=True, colors=None, **kwargs):
+    if Y.shape[0] != B.shape[0]:
+        raise ValueError("Y and B must have the same number of time steps")
+
     if colors is None:
         colors = sns.color_palette('deep', len(state_names))
         color_dict = {name: color for name, color in zip(np.unique(B), colors)}
