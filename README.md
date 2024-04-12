@@ -12,6 +12,13 @@ After creating a new virtual environment, to install dependencies, you can run
 ```bash
 python3 -m pip install -r requirements.txt
 ```
+
+Windows users may additionally require,
+```bash
+python3 -m pip install imageio
+python3 -m pip install xarray
+```
+
 For the journal article on BunDLe-Net, see [https://www.biorxiv.org/content/10.1101/2023.08.08.551978v2](https://www.biorxiv.org/content/10.1101/2023.08.08.551978v2)
 
 For a demonstration of BunDLe-Net, please refer to the `main.py` file or explore the `notebooks/` directory for a Jupyter Notebook demo. You'll find all the heavy-lifting and the algorithm itself in the `functions/` directory.
