@@ -14,9 +14,6 @@ data/generated/
 data/raw/fish_cilia/
 data/raw/stimuli_data_jalaja
 
-#experimental 
-experimental/
-
 # Distribution / packaging
 .Python
 build/
