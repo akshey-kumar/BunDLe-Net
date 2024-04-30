@@ -1,4 +1,8 @@
 # BunDLe-Net
+
+![BunDLe-Net embedding of C.elegans neuronal data in 3-D latent space](https://github.com/akshey-kumar/BunDLe-Net/blob/main/figures/rotation_comparable_embeddings/rotation_BunDLeNet_worm_0.gif)
+**BunDLe-Net embedding of *C.elegans* neuronal data in 3-D latent space**
+
 Behavioural and Dynamic Learning Network (BunDLe Net) is an algorithm to learn meaningful coarse-grained representations from time-series data. It maps high-dimensional data to low-dimensional space while preserving both dynamical and behavioural information. It has been applied, but is not limited, to neuronal manifold learning. 
 
 Create a virtual environment with Python 3.10.13. You can check your Python version by running:
@@ -25,6 +29,4 @@ For a demonstration of BunDLe-Net, please refer to the `main.py` file or explore
 
 For the comparision of BunDLe-Net with other commonly used embedding methods, and detailed evaluation of the embeddings, please see [https://github.com/akshey-kumar/comparison-algorithms](https://github.com/akshey-kumar/comparison-algorithms)
 
-**BunDLe-Net embedding of *C.elegans* neuronal data in 3-D latent space**
 
-![BunDLe-Net embedding of C.elegans neuronal data in 3-D latent space](https://github.com/akshey-kumar/BunDLe-Net/blob/main/figures/rotation_comparable_embeddings/rotation_BunDLeNet_worm_0.gif)
