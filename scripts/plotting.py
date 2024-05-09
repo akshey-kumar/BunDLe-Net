@@ -13,8 +13,9 @@ This script was used for plotting all the figures
 in the jounral paper for BunDLe-Net. Some of the 
 data was already produced in other python scripts 
 can be found in the main repo unless otherwise 
-indicated. To reproduce a figure, uncomment the 
-section of code for the corresponding figure.
+indicated. To reproduce a given figure, uncomment 
+the section of code for the corresponding figure
+and run that section alone.
 
 """
 
@@ -54,7 +55,54 @@ optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=0.001)
 
 
 
-### figure 1 - bundle net on many worms (see scripts/embedding_worms_separately.py)
+### figure 1 - BunDLe-Net architecture
+
+
+### figure 2 - quantitative comparison of various algorithms - see https://github.com/akshey-kumar/comparison-algorithms/blob/main/plotting.ipynb
+
+
+### figure 3 - comparison of manifolds learnt various algorithms - embeddings generated in https://github.com/akshey-kumar/comparison-algorithms/<#_algorithm>.py
+elev = [-117, 171, 94, 38, 27, 27, -22, -148]
+azim = [-66, -146, -142, -146, -128, -119, -41, 161]
+
+worm_num = 0
+algorithms = ['PCA', 'tsne', 'autoencoder', 'autoregressor', 'cebra_B', 'cebra_time', 'cebra_hybrid']
+for i, algorithm in enumerate(algorithms):
+    print(i, algorithm)
+    Y0_ = np.loadtxt('data/generated/saved_Y/comparison_algorithms/Y0_tr__' + algorithm + '.csv')
+    B_ = np.loadtxt('data/generated/saved_Y/comparison_algorithms/B_train_1__' + algorithm + '.csv').astype(int)
+    Y0_ = 2*Y0_/np.std(Y0_)
+    fig = plt.figure(figsize=(8,8))
+    ax = plt.axes(projection='3d')
+    ax.view_init(elev=elev[i], azim=azim[i], roll=0)
+    plot_ps_(fig, ax, Y=Y0_, B=B_, state_names=state_names, show_points=False, legend=False)
+    plt.savefig('figures/figure_2/Y0_' + algorithm + '.pdf', transparent=True)
+    plt.show()
+    #rotating_plot(Y=Y0_, B=B_, filename='figures/rotation_'+ algorithm + '_worm_'+str(worm_num) +'_pts.gif', state_names=state_names, legend=False, show_points=False)
+
+
+'''
+### figure 4 - bundle net on many worms - consistent embeddings (see scripts/comparable_embeddings.py)
+algorithm = 'BunDLeNet'
+elev = -161
+azim = 61
+
+for worm_num in range(5):
+    print(worm_num)
+    Y0_ = np.loadtxt('data/generated/saved_Y/comparable_embeddings/Y0__' + algorithm + '_worm_' + str(worm_num))
+    B_ = np.loadtxt('data/generated/saved_Y/comparable_embeddings/B__' + algorithm + '_worm_' + str(worm_num)).astype(int)
+    
+    fig = plt.figure(figsize=(8,8))
+    ax = plt.axes(projection='3d')
+    ax.view_init(elev=elev, azim=azim, roll=0)
+    plot_ps_(fig, ax, Y=Y0_, B=B_, state_names=state_names, show_points=False, legend=False)
+    #plt.savefig('figures/figure_1/comparable_embeddings/Y0_' + algorithm + '_worm_' + str(worm_num) + '.pdf', transparent=True)
+    #rotating_plot(Y=Y0_, B=B_, filename='figures/comparable_embeddings/rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=False, show_points=False)
+plt.show()
+
+
+
+### figure - bundle net on many worms separately (see scripts/embedding_worms_separately.py)
 algorithm = 'BunDLeNet'
 elev = [-45,0,22,-40,-35]
 azim = [162,8,-105,65,101]
@@ -74,50 +122,39 @@ for worm_num in range(5):
     rotating_plot(Y=Y0_, B=B_, filename='figures/rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=True, show_points=False)
 
 '''
-### figure 1 - attempt 2 (see scripts/comparable_embeddings.py)
-algorithm = 'BunDLeNet'
-elev = -161
-azim = 61
 
-for worm_num in range(5):
-    print(worm_num)
-    Y0_ = np.loadtxt('data/generated/saved_Y/comparable_embeddings/Y0__' + algorithm + '_worm_' + str(worm_num))
-    B_ = np.loadtxt('data/generated/saved_Y/comparable_embeddings/B__' + algorithm + '_worm_' + str(worm_num)).astype(int)
-    
-    fig = plt.figure(figsize=(8,8))
-    ax = plt.axes(projection='3d')
-    ax.view_init(elev=elev, azim=azim, roll=0)
-    plot_ps_(fig, ax, Y=Y0_, B=B_, state_names=state_names, show_points=False, legend=False)
-    #plt.savefig('figures/figure_1/comparable_embeddings/Y0_' + algorithm + '_worm_' + str(worm_num) + '.pdf', transparent=True)
-    #rotating_plot(Y=Y0_, B=B_, filename='figures/comparable_embeddings/rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=False, show_points=False)
-plt.show()
-
-### figure 2 - comparison of various algorithms
-elev = [-117, 171, 94, 38, 27, 27, -22, -148]
-azim = [-66, -146, -142, -146, -128, -119, -41, 161]
-
-worm_num = 0
-algorithms = ['PCA', 'tsne', 'autoencoder', 'autoregressor', 'cebra_B', 'cebra_time', 'cebra_hybrid', 'AbCNet']
-for i, algorithm in enumerate(algorithms):
-    print(i, algorithm)
-    Y0_ = np.loadtxt('data/generated/saved_Y/comparison_algorithms/Y0_tr__' + algorithm + '.csv')
-    B_ = np.loadtxt('data/generated/saved_Y/comparison_algorithms/B_train_1__' + algorithm + '.csv').astype(int)
-    Y0_ = 2*Y0_/np.std(Y0_)
-    fig = plt.figure(figsize=(8,8))
-    ax = plt.axes(projection='3d')
-    ax.view_init(elev=elev[i], azim=azim[i], roll=0)
-    plot_ps_(fig, ax, Y=Y0_, B=B_, state_names=state_names, show_points=False, legend=False)
-    plt.savefig('figures/figure_2/Y0_' + algorithm + '.pdf', transparent=True)
-    plt.show()
-    #rotating_plot(Y=Y0_, B=B_, filename='figures/rotation_'+ algorithm + '_worm_'+str(worm_num) +'_pts.gif', state_names=state_names, legend=False, show_points=False)
+### figure 5 - Rat embeddings https://github.com/akshey-kumar/BunDLe-Net-continuous/tree/main/notebooks
 
 
+### figure 6 - Monkey embeddings https://github.com/akshey-kumar/BunDLe-Net-continuous/blob/main/notebooks/embeddings_monkey-1.ipynb
 
-### figure 3 - see dcc-methods/Results for paper/plotting
 
+### figure 7 - Commutativity diagram - made in LaTeX
 
 '''
-### figure 4 - confusion matrix of behaviour and plot of true vs predicted dynamics
+### figure 8 - Learning curve
+# Training losses vs epochs
+loss_array = train_model(X_,
+           B_,
+           model,
+           optimizer,
+           gamma=0.9, 
+           n_epochs=1000,
+           pca_init=True)
+
+plt.figure(figsize=(5,3.5))
+for i, label in  enumerate(["$\mathcal{L}_{{Markov}}$", "$\mathcal{L}_{{Behavior}}$","Total loss $\mathcal{L}$" ]):
+    plt.semilogy(loss_array[:,i], label=label)
+plt.legend()
+plt.xlabel('Training epochs')
+plt.subplots_adjust(bottom=0.25)
+plt.grid(axis='y', linestyle=':', color='gray', alpha=0.5)
+plt.savefig('figures/learning_curve.pdf', transparent=True)
+plt.show()
+
+
+
+### figure 9 - confusion matrix of behaviour and plot of true vs predicted dynamics
 ## Behaviour predictor (implicit in the BunDLe Net)
 model.load_weights('data/generated/BunDLeNet_model')
 Y0_ = model.tau(X_[:,0]).numpy() # Y_t
@@ -147,44 +184,14 @@ plt.legend(handles=[true_y_line[0], predicted_y_line[0]])
 
 plt.savefig('figures/dynamics.pdf', transparent=True)
 plt.show()
-'''
-
-### figure 5 - Learning curve
-# Training losses vs epochs
-loss_array = train_model(X_,
-           B_,
-           model,
-           optimizer,
-           gamma=0.9, 
-           n_epochs=1000,
-           pca_init=True)
-
-plt.figure(figsize=(5,3.5))
-for i, label in  enumerate(["$\mathcal{L}_{{Markov}}$", "$\mathcal{L}_{{Behavior}}$","Total loss $\mathcal{L}$" ]):
-    plt.semilogy(loss_array[:,i], label=label)
-plt.legend()
-plt.xlabel('Training epochs')
-plt.subplots_adjust(bottom=0.25)
-plt.grid(axis='y', linestyle=':', color='gray', alpha=0.5)
-plt.savefig('figures/learning_curve.pdf', transparent=True)
-plt.show()
 
 
 
-### figure 6 - Learning process - see BunDLe-Net/scripts/learning_process.py
-epochs = 1000
-delta_epochs = 50
-for i in range(delta_epochs,epochs,delta_epochs):
-    print(i)
-    Y0_ = np.load('data/generated/learning_process/Y0_after_' + str(i) + '_epochs.npy')
-    fig = plt.figure(figsize=(8, 8))
-    ax = plt.axes(projection='3d')
-    ax.view_init(elev=56, azim=-2, roll=0)
-    plot_ps_(fig, ax, Y=Y0_, B=B_, state_names=state_names, show_points=False, legend=False)
-    plt.savefig('figures/learning_process/Y0_after_' + str(i) + '_epochs.pdf')
+### figure 10 - autoencoder and autoencoder-autoregressor architectures
 
 
-### figure 7 - distinct behavioural motifs
+
+### figure 11 - distinct behavioural motifs
 algorithm = 'BunDLeNet'
 elev = [13, -47]
 azim = [-148, 60]
@@ -199,4 +206,18 @@ for i, worm_num in enumerate([0, 0]):
     plot_ps_(fig, ax, Y=Y0_, B=B_, state_names=state_names, show_points=False, legend=True)
     plt.savefig('figures/figure_7_distinct_motifs/Y0_' + algorithm + '_worm_' + str(worm_num) + 'per' + str(i) +'.pdf', transparent=True)
     #rotating_plot(Y=Y0_, B=B_, filename='figures/comparable_embeddings/rotation_'+ algorithm + '_worm_'+str(worm_num) +'.gif', state_names=state_names, legend=False, show_points=False)
+
+
+
+### figure 12 - Learning process - see BunDLe-Net/scripts/learning_process.py
+epochs = 1000
+delta_epochs = 50
+for i in range(delta_epochs,epochs,delta_epochs):
+    print(i)
+    Y0_ = np.load('data/generated/learning_process/Y0_after_' + str(i) + '_epochs.npy')
+    fig = plt.figure(figsize=(8, 8))
+    ax = plt.axes(projection='3d')
+    ax.view_init(elev=56, azim=-2, roll=0)
+    plot_ps_(fig, ax, Y=Y0_, B=B_, state_names=state_names, show_points=False, legend=False)
+    plt.savefig('figures/learning_process/Y0_after_' + str(i) + '_epochs.pdf')
 '''
